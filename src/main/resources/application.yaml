@@ -5,7 +5,9 @@ spring:
     resources:
       static-locations: file:/Users/laurkankushu/dev/tmp/storage
   datasource:
-    url: "jdbc:h2:file:./db/blog"
+    url: "jdbc:h2:file:./db/shop"
     driverClassName: "org.h2.Driver"
     username: "sa"
     password: "password"
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.xml
