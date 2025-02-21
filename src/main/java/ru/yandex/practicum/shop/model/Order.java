@@ -22,4 +22,8 @@ public class Order {
 
     @CreatedDate
     private LocalDate createdAt;
+
+    public void addItem(OrderItem orderItem) {
+        items.add(orderItem);
+    }
 }
