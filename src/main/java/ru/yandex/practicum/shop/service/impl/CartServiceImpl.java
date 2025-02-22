@@ -27,8 +27,8 @@ public class CartServiceImpl implements CartService {
         cart.put(product.getId(), new CartItem(product, 1));
     }
 
-    public void removeItemFromCart(Product product) {
-        cart.remove(product.getId());
+    public void removeItemFromCart(Long productId) {
+        cart.remove(productId);
     }
 
     public synchronized void increaseItemCount(Long productId) {
