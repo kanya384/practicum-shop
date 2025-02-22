@@ -4,18 +4,6 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="create_order_item_sequence" author="laurkan">
-        <preConditions>
-            <not>
-                <sequenceExists sequenceName="order_item_sequence"/>
-            </not>
-        </preConditions>
-        <createSequence sequenceName="order_item_sequence" incrementBy="1"/>
-        <rollback>
-            <dropSequence sequenceName="order_item_sequence"/>
-        </rollback>
-    </changeSet>
-
     <changeSet id="create_order_item_table" author="laurkan">
         <preConditions>
             <not>
@@ -23,7 +11,7 @@
             </not>
         </preConditions>
         <createTable tableName="order_items">
-            <column name="id" type="bigint">
+            <column name="id" type="bigserial">
                 <constraints primaryKey="true"/>
             </column>
             <column name="order_id" type="bigint">

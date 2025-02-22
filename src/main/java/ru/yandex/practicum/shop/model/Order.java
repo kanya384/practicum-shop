@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-@Table(name = "order")
+@Table(name = "orders")
 @Getter
 @Setter
 public class Order {
@@ -17,7 +17,8 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
     private List<OrderItem> items;
 
     @CreatedDate
