@@ -10,6 +10,7 @@ import ru.yandex.practicum.shop.model.Order;
 import ru.yandex.practicum.shop.model.OrderItem;
 
 @Mapper(
+        uses = {ProductMapper.class},
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
         componentModel = MappingConstants.ComponentModel.SPRING,
         unmappedTargetPolicy = ReportingPolicy.IGNORE

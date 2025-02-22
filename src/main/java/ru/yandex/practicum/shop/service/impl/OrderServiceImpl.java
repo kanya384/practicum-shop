@@ -33,12 +33,12 @@ public class OrderServiceImpl implements OrderService {
             order.addItem(orderMapper.map(cartItem));
         });
 
-        orderRepository.save(order);
-        orderItemRepository.saveAll(order.getItems());
+        var savedOrder = orderRepository.save(order);
+        orderItemRepository.saveAll(savedOrder.getItems());
 
         cartService.clearCart();
-
-        return orderMapper.map(order);
+        
+        return orderMapper.map(savedOrder);
     }
 
     @Override
