@@ -10,11 +10,11 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 @AllArgsConstructor
 public class ProductUpdateDTO {
-    private JsonNullable<String> title;
+    private String title;
 
-    private JsonNullable<String> description;
+    private String description;
 
     private JsonNullable<MultipartFile> image;
 
-    private JsonNullable<Integer> price;
+    private Integer price;
 }

@@ -9,6 +9,7 @@ import org.openapitools.jackson.nullable.JsonNullable;
         componentModel = MappingConstants.ComponentModel.SPRING
 )
 public abstract class JsonNullableMapper {
+
     public <T> JsonNullable<T> wrap(T entity) {
         return JsonNullable.of(entity);
     }

@@ -17,7 +17,7 @@ public class ProductCreateDTO {
     private String description;
 
     @NotNull
-    private MultipartFile image;
+    private MultipartFile file;
 
     @NotNull
     private Integer price;

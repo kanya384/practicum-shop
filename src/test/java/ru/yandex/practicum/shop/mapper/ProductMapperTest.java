@@ -1,16 +1,18 @@
 package ru.yandex.practicum.shop.mapper;
 
 import org.junit.jupiter.api.Test;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import ru.yandex.practicum.shop.dto.product.ProductCreateDTO;
 import ru.yandex.practicum.shop.dto.product.ProductResponseDTO;
+import ru.yandex.practicum.shop.dto.product.ProductUpdateDTO;
 import ru.yandex.practicum.shop.model.Product;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = {ProductMapperImpl.class, JsonNullableMapperImpl.class})
+@SpringBootTest(classes = {ProductMapperImpl.class})
 public class ProductMapperTest {
     @Autowired
     private ProductMapper productMapper;
@@ -44,9 +46,8 @@ public class ProductMapperTest {
 
     @Test
     void update_shouldUpdateProductFields() {
-        //TODO - fix test
-        /*var updateData = new ProductUpdateDTO(JsonNullable.of("new title"), JsonNullable.of("new description"), JsonNullable.of(new MockMultipartFile("image", "image.jpg", "image/jpg",
-                "some image".getBytes())), JsonNullable.of(200));
+        var updateData = new ProductUpdateDTO("new title", "new description", JsonNullable.of(new MockMultipartFile("image", "image.jpg", "image/jpg",
+                "some image".getBytes())), 200);
 
         var product = new Product(1L, "title", "description", "image", 100);
 
@@ -54,6 +55,6 @@ public class ProductMapperTest {
 
         assertEquals("new title", product.getTitle());
         assertEquals("new description", product.getDescription());
-        assertEquals(200, product.getPrice());*/
+        assertEquals(200, product.getPrice());
     }
 }
