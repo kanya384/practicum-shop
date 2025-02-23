@@ -18,8 +18,8 @@ import java.util.UUID;
 public class FileSystemStorageUtil implements StorageUtil {
     private final Path rootPath;
 
-    public FileSystemStorageUtil(AppConfiguration rootAppConfiguration) {
-        this.rootPath = Paths.get(rootAppConfiguration.getStorageRootPath());
+    public FileSystemStorageUtil(AppConfiguration appConfiguration) {
+        this.rootPath = Paths.get(appConfiguration.getStorageRootPath());
         try {
             Files.createDirectories(rootPath);
         } catch (IOException e) {
@@ -47,6 +47,12 @@ public class FileSystemStorageUtil implements StorageUtil {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void removeFile(String fileName) throws IOException {
+        Path filePath = rootPath.resolve(fileName);
+        Files.delete(filePath);
     }
 
     private String generateRandomFileName(String originalName) {

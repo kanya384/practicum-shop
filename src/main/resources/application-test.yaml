@@ -1,11 +1,14 @@
 spring:
-  application:
-    name: shop
   web:
     resources:
-      static-locations: file:/Users/laurkankushu/dev/tmp/storage
+      static-locations: ./tmp
+  application:
+    name: shop
+  sql:
+    init:
+      mode: always
   datasource:
-    url: jdbc:h2:file:./db/shop
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driverClassName: org.h2.Driver
     username: sa
     password: password
