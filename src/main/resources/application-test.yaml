@@ -1,7 +1,4 @@
 spring:
-  web:
-    resources:
-      static-locations: ./tmp
   application:
     name: shop
   sql:
@@ -14,3 +11,4 @@ spring:
     password: password
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
+storage-path: ./temp

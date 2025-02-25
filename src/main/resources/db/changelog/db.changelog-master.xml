@@ -7,5 +7,6 @@
     <include file="0001-init-product-schema.xml" relativeToChangelogFile="true"/>
     <include file="0002-init-order-schema.xml" relativeToChangelogFile="true"/>
     <include file="0003-init-order-item-schema.xml" relativeToChangelogFile="true"/>
+    <include file="0004-load-products-from-file.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

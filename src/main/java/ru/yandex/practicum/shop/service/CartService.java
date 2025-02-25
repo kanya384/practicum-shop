@@ -2,12 +2,12 @@ package ru.yandex.practicum.shop.service;
 
 import ru.yandex.practicum.shop.dto.cart.CartItemResponseDTO;
 import ru.yandex.practicum.shop.model.CartItem;
-import ru.yandex.practicum.shop.model.Product;
 
 import java.util.List;
+import java.util.Map;
 
 public interface CartService {
-    void addItemToCart(Product product);
+    void addItemToCart(Long productId);
 
     void removeItemFromCart(Long productId);
 
@@ -18,6 +18,8 @@ public interface CartService {
     void clearCart();
 
     List<CartItem> getCartItems();
+
+    Map<Long, CartItem> getProductsInCartMap();
 
     List<CartItemResponseDTO> returnCartItems();
 }

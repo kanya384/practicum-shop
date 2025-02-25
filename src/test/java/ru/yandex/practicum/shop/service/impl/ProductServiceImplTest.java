@@ -9,15 +9,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.multipart.MultipartFile;
-import ru.yandex.practicum.shop.dto.product.ProductCreateDTO;
-import ru.yandex.practicum.shop.dto.product.ProductResponseDTO;
-import ru.yandex.practicum.shop.dto.product.ProductUpdateDTO;
+import ru.yandex.practicum.shop.dto.product.*;
 import ru.yandex.practicum.shop.mapper.ProductMapperImpl;
+import ru.yandex.practicum.shop.model.CartItem;
 import ru.yandex.practicum.shop.model.Product;
 import ru.yandex.practicum.shop.repository.ProductRepository;
 import ru.yandex.practicum.shop.utils.StorageUtil;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,13 +25,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = {ProductServiceImpl.class, ProductMapperImpl.class})
+@SpringBootTest(classes = {ProductServiceImpl.class, ProductMapperImpl.class, CartServiceImpl.class})
 public class ProductServiceImplTest {
     @MockitoBean
     private ProductRepository productRepository;
 
     @MockitoBean
     private StorageUtil storageUtil;
+
+    @MockitoBean
+    private CartServiceImpl cartService;
 
     @Autowired
     private ProductServiceImpl productService;
@@ -115,24 +118,61 @@ public class ProductServiceImplTest {
 
     @Test
     void findAll_shouldReturnProductsListIfSearchIsEmpty() {
+        Product product1 = new Product(1L, "old title", "old image", "old content", 50);
+        Product product2 = new Product(2L, "old title", "old image", "old content", 50);
+
         when(productRepository.findAll(any(PageRequest.class)))
-                .thenReturn(new PageImpl<>(List.of(new Product(1L, "old title", "old image", "old content", 50),
-                        new Product(2L, "old title", "old image", "old content", 50))));
+                .thenReturn(new PageImpl<>(List.of(product1, product2)));
 
-        List<ProductResponseDTO> products = productService.findAll("", 10, 11);
+        when(productRepository.countAll()).thenReturn(2);
 
-        assertEquals(2, products.size());
+        when(cartService.getProductsInCartMap())
+                .thenReturn(Map.of(
+                        1L, new CartItem(product1, 1))
+                );
+
+        ProductsPageResponseDTO products = productService.findAll("", 10, 11, ProductSort.EMPTY);
+
+        assertEquals(2, products.getTotalCount());
+
+        ProductResponseDTO product1Result = products.getList()
+                .stream()
+                .filter(pr -> pr.getId() == 1)
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(product1Result);
+        assertEquals(1, product1Result.getCount());
     }
 
     @Test
     void findAll_shouldReturnProductsListIfSearchIsNotEmpty() {
+        Product product1 = new Product(1L, "old title", "old image", "old content", 50);
+        Product product2 = new Product(2L, "old title", "old image", "old content", 50);
+
         when(productRepository.findAllByTitleOrDescription(any(String.class), any(PageRequest.class)))
-                .thenReturn(List.of(new Product(1L, "old title", "old image", "old content", 50),
-                        new Product(2L, "old title", "old image", "old content", 50)));
+                .thenReturn(List.of(product1,
+                        product2));
 
-        List<ProductResponseDTO> products = productService.findAll("search", 10, 11);
+        when(productRepository.countAllByTitleOrDescription(any(String.class))).thenReturn(2);
 
-        assertEquals(2, products.size());
+        when(cartService.getProductsInCartMap())
+                .thenReturn(Map.of(
+                        1L, new CartItem(product1, 1))
+                );
+
+        ProductsPageResponseDTO products = productService.findAll("search", 10, 11, ProductSort.EMPTY);
+
+        assertEquals(2, products.getTotalCount());
+
+        ProductResponseDTO product1Result = products.getList()
+                .stream()
+                .filter(pr -> pr.getId() == 1)
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(product1Result);
+        assertEquals(1, product1Result.getCount());
     }
 
 }

@@ -1,0 +1,14 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="Load data from CSV file" author="laurkan">
+        <loadData tableName="products" file="data.csv">
+            <column name="US_ID" header="id"/>
+            <column name="US_CREATION_DATE" header="creationDate"/>
+            <column name="US_NAME" header="name"/>
+            <column name="US_ACTIVE" header="status"/>
+        </loadData>
+    </changeSet>
+</databaseChangeLog>

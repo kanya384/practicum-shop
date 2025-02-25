@@ -16,6 +16,7 @@ public abstract class ProductMapper {
     @Mapping(target = "image", ignore = true)
     public abstract Product map(ProductCreateDTO data);
 
+    @Mapping(target = "count", ignore = true)
     public abstract ProductResponseDTO map(Product product);
 
     @Mapping(target = "image", ignore = true)

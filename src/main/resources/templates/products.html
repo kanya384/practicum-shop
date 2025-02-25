@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Интернет магазин</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/products.css}" rel="stylesheet"/>
+</head>
+<body>
+<div class="container">
+    <div class="pt-3 d-flex justify-content-end">
+        <a class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                <path d="M17 17h-11v-14h-2"/>
+                <path d="M6 5l14 1l-1 7h-13"/>
+            </svg>
+        </a>
+    </div>
+    <nav class="row pt-4 g-2">
+        <div class="col-sm d-flex justify-content-start align-items-center mb-3">
+            <form th:action="@{/products}" class="input-group" style="max-width:250px">
+                <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.sort)}"/>
+                <input type="hidden" name="pageSize" th:value="${products.pageSize}"/>
+                <input type="text" class="form-control" placeholder="Название товара" id="search" name="search"
+                       th:value="${params.search}">
+                <button type="submit" class="input-group-append" style="cursor:pointer; padding:0; border: none">
+                    <span class="input-group-text" id="basic-addon2"><svg xmlns="http://www.w3.org/2000/svg" width="25"
+                                                                          height="25" viewBox="0 0 25 25" fill="none"
+                                                                          stroke="currentColor" stroke-width="2"
+                                                                          stroke-linecap="round" stroke-linejoin="round"
+                                                                          class="icon icon-tabler icons-tabler-outline icon-tabler-search"><path
+                            stroke="none" d="M0 0h24v24H0z" fill="none"/><path
+                            d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg></span>
+                </button>
+            </form>
+            <span style="margin-left:20px">Сортировка: </span>
+            <form th:action="@{/products}" style="margin-left:5px">
+                <input type="hidden" name="search" th:value="${params.search}"/>
+                <input type="hidden" name="pageSize" th:value="${products.pageSize}"/>
+                <select class="form-select" name="sort" id="name" onchange="changePageSize(event)">
+                    <option value="">Нет</option>
+                    <option th:selected="${#strings.toLowerCase(params.sort) == 'title'}" value="title">По алфавиту
+                    </option>
+                    <option th:selected="${#strings.toLowerCase(params.sort) == 'price'}" value="price">По цене</option>
+                </select>
+            </form>
+        </div>
+        <div class="col-sm row d-flex flex-row justify-content-end">
+            <ul class="pagination" style="max-width: 120px;">
+                <li th:if="${products.hasPrevPage}"
+                    class="page-item">
+                    <a class="page-link"
+                       th:href="@{${'/products?page=' + (products.page - 1) + '&pageSize='+ products.pageSize + '&search=' + params.search + '&sort=' + #strings.toLowerCase(params.sort)}}"
+                       aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#" aria-label="Previous">
+                        <span aria-hidden="true" th:text="${products.page}"></span>
+                    </a>
+                </li>
+                <li th:if="${products.hasNextPage}"
+                    class="page-item">
+                    <a class="page-link"
+                       th:href="@{${'/products?page=' + (products.page + 1) + '&pageSize='+ products.pageSize + '&search=' + params.search + '&sort=' + #strings.toLowerCase(params.sort)}}"
+                       aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+            <form th:action="@{/products}" style="width: 100px; height: 35px">
+                <input type="hidden" name="search" th:value="${params.search}"/>
+                <input type="hidden" name="sort" th:value="${params.sort}"/>
+                <select class="form-select" name="pageSize" onchange="changePageSize(event)">
+                    <option th:each="size : ${params.pageSizes}"
+                            th:value="${size}"
+                            th:selected="${products.pageSize} == ${size} ? true : false"
+                            th:text="${size}">
+                    </option>
+                </select>
+            </form>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3 pb-5">
+            <div class="col" th:each="product : ${products.list}">
+                <div class="card shadow-sm">
+                    <img class="bd-placeholder-img card-img-top"
+                         th:src="${#strings.contains(product.image,'http')}?${product.image}:@{${'/' + product.image}}"
+                    />
+
+                    <div class="card-body">
+                        <div class="price-text" th:text="${product.price + ' ₽'}"></div>
+                        <p class="card-text title" th:text="${product.title}"></p>
+                        <div class="items-in-cart d-flex justify-content-end">
+                            <form th:if="${product.count == null}" th:action="@{${'/cart/add/' + product.id}}"
+                                  method="post"
+                                  class="d-flex justify-content-end"
+                                  style="max-width:250px">
+                                <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.sort)}"/>
+                                <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.search)}"/>
+                                <input type="hidden" name="page" th:value="${products.page}"/>
+                                <input type="hidden" name="pageSize" th:value="${products.pageSize}"/>
+                                <button type="submit"
+                                        class="items-in-cart-add btn btn-outline-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                         stroke-linejoin="round"
+                                         class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart-plus">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                        <path d="M4 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/>
+                                        <path d="M12.5 17h-6.5v-14h-2"/>
+                                        <path d="M6 5l14 1l-.86 6.017m-2.64 .983h-10.5"/>
+                                        <path d="M16 19h6"/>
+                                        <path d="M19 16v6"/>
+                                    </svg>
+                                </button>
+                            </form>
+                            <div th:unless="${product.count == null}" class="items-in-cart-count btn-group">
+                                <form th:action="@{${'/cart/dec/' + product.id}}"
+                                      method="post"
+                                      class="d-flex justify-content-end"
+                                      style="max-width:250px">
+                                    <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.sort)}"/>
+                                    <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.search)}"/>
+                                    <input type="hidden" name="page" th:value="${products.page}"/>
+                                    <input type="hidden" name="pageSize" th:value="${products.pageSize}"/>
+                                    <button type="submit" class="btn btn-outline-secondary">-</button>
+                                </form>
+                                <button type="button" class="btn btn-outline-secondary"
+                                        th:text="${product.count}"></button>
+                                <form th:action="@{${'/cart/inc/' + product.id}}"
+                                      method="post"
+                                      style="max-width:250px">
+                                    <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.sort)}"/>
+                                    <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.search)}"/>
+                                    <input type="hidden" name="page" th:value="${products.page}"/>
+                                    <input type="hidden" name="pageSize" th:value="${products.pageSize}"/>
+                                    <button type="submit" class="btn btn-outline-secondary">+</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const changePageSize = (e) => {
+        e.target.closest('form').submit()
+    }
+</script>
+</body>
+</html>

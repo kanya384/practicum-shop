@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Название товара</title>
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+    <div class="pt-3 d-flex justify-content-end">
+        <a class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                <path d="M17 17h-11v-14h-2"/>
+                <path d="M6 5l14 1l-1 7h-13"/>
+            </svg>
+        </a>
+    </div>
+    <div class="d-flex justify-content-center">
+        <div class="col-xl-8 col-lg-8 order-1 order-md-0">
+            <div class="product-section mt-5">
+                <div class="d-flex justify-content-center align-items-center flex-column">
+                    <img style="margin-right: 20px" class="img-fluid rounded mb-4"
+                         src="https://ir-3.ozone.ru/s3/multimedia-1-r/wc1000/7052426295.jpg" height="400" width="400"
+                         alt="User avatar">
+                    <div class="item-body" style="padding:10px 50px">
+                        <div class="d-flex flex-column flex-wrap mt-2">
+                            <h5 class="mb-5">Влажный корм для кошек Felix Sensations, курица в желе с морковью, 75 г x
+                                26 шт</h5>
+                            <span>Мясо и мясные ингредиенты (включая курицу), экстракты растительного белка, аминокислоты, рыба и продукты ее переработки, загустители, овощи (включая морковь), минеральные вещества, сахара, витамины.</span>
+                        </div>
+                        <div class="items-in-cart mt-5 d-flex justify-content-end">
+                            <button type="button" onclick="addToCart(event)"
+                                    class="items-in-cart-add btn btn-outline-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                     stroke-linejoin="round"
+                                     class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart-plus">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                    <path d="M4 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/>
+                                    <path d="M12.5 17h-6.5v-14h-2"/>
+                                    <path d="M6 5l14 1l-.86 6.017m-2.64 .983h-10.5"/>
+                                    <path d="M16 19h6"/>
+                                    <path d="M19 16v6"/>
+                                </svg>
+                            </button>
+                            <div style="display:none" class="items-in-cart-count btn-group">
+                                <button type="button" class="btn btn-outline-secondary">-</button>
+                                <button type="button" class="btn btn-outline-secondary">10</button>
+                                <button type="button" class="btn btn-outline-secondary">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function addToCart(e) {
+        e.target.closest('.items-in-cart-add').style.display = 'none';
+        e.currentTarget.parentNode.querySelector('.items-in-cart-count').style.display = 'flex';
+    }
+</script>
+</body>
+</html>

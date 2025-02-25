@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Создание товара</title>
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="d-flex flex-column align-items-center justify-content-center" style="margin-top: 80px">
+    <div class="mb-2">
+        <h5>Создание товара</h5>
+    </div>
+    <form style="width: 26rem;">
+        <div data-mdb-input-init class="form-outline mb-4">
+            <label class="form-label" for="photo">Фото</label>
+            <input type="file" id="photo" class="form-control" placeholder="Прикрепите фото" accept="image/*"/>
+        </div>
+        <div data-mdb-input-init class="form-outline mb-4">
+            <label class="form-label" for="name">Название</label>
+            <input type="text" id="name" class="form-control" placeholder="введите название"/>
+        </div>
+        <div data-mdb-input-init class="form-outline mb-4">
+            <label class="form-label" for="price">Цена</label>
+            <input type="number" id="price" class="form-control" placeholder="введите цену"/>
+        </div>
+
+        <div data-mdb-input-init class="form-outline mb-4">
+            <label class="form-label" for="form4Example3">Описание</label>
+            <textarea class="form-control" id="form4Example3" rows="4" placeholder="введите описание"></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <button data-mdb-ripple-init type="button" class="btn btn-primary btn-block mb-4">Сохранить</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
