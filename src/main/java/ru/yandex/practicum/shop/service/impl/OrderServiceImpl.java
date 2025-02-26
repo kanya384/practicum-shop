@@ -8,6 +8,7 @@ import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
 import ru.yandex.practicum.shop.mapper.OrderMapper;
 import ru.yandex.practicum.shop.model.CartItem;
 import ru.yandex.practicum.shop.model.Order;
+import ru.yandex.practicum.shop.model.OrderItem;
 import ru.yandex.practicum.shop.repository.OrderItemRepository;
 import ru.yandex.practicum.shop.repository.OrderRepository;
 import ru.yandex.practicum.shop.service.CartService;
@@ -29,16 +30,19 @@ public class OrderServiceImpl implements OrderService {
         List<CartItem> cartItems = cartService.getCartItems();
 
         Order order = new Order();
+
         cartItems.forEach(cartItem -> {
-            order.addItem(orderMapper.map(cartItem));
+            OrderItem orderItem = OrderMapper.map(cartItem);
+            orderItem.setOrder(order);
+            order.addItem(orderItem);
         });
 
-        var savedOrder = orderRepository.save(order);
-        orderItemRepository.saveAll(savedOrder.getItems());
+        orderRepository.save(order);
+        orderItemRepository.saveAll(order.getItems());
 
         cartService.clearCart();
-        
-        return orderMapper.map(savedOrder);
+
+        return orderMapper.map(order);
     }
 
     @Override
@@ -56,4 +60,5 @@ public class OrderServiceImpl implements OrderService {
                 .map(orderMapper::map)
                 .toList();
     }
+
 }

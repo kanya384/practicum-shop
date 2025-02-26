@@ -54,10 +54,18 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDTO findById(Long id) {
-        return productRepository
+        ProductResponseDTO product = productRepository
                 .findById(id)
                 .map(productMapper::map)
                 .orElseThrow(() -> new ResourceNotFoundException("Продукт", id));
+
+        CartItem cartItem = cartService.getCartItemById(id);
+
+        if (cartItem != null) {
+            product.setCount(cartItem.getCount());
+        }
+        
+        return product;
     }
 
     @Override

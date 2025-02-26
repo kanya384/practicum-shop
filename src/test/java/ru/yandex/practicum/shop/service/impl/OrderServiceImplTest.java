@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import ru.yandex.practicum.shop.mapper.OrderMapperImpl;
+import ru.yandex.practicum.shop.mapper.ProductMapperImpl;
 import ru.yandex.practicum.shop.model.CartItem;
 import ru.yandex.practicum.shop.model.Order;
-import ru.yandex.practicum.shop.model.OrderItem;
 import ru.yandex.practicum.shop.model.Product;
 import ru.yandex.practicum.shop.repository.OrderItemRepository;
 import ru.yandex.practicum.shop.repository.OrderRepository;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = {OrderServiceImpl.class, OrderMapperImpl.class})
+@SpringBootTest(classes = {OrderServiceImpl.class, OrderMapperImpl.class, ProductMapperImpl.class})
 public class OrderServiceImplTest {
     @MockitoBean
     private OrderRepository orderRepository;
@@ -51,7 +51,7 @@ public class OrderServiceImplTest {
                 .thenReturn(List.of(new CartItem(product, 1)));
 
         when(orderRepository.save(any(Order.class)))
-                .thenReturn(new Order(1L, List.of(new OrderItem(1L, product, 1)), LocalDate.now()));
+                .thenReturn(new Order(1L, List.of(), LocalDate.now()));
 
         var order = orderService.placeOrder();
 

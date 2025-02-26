@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Название товара</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/product.css}" rel="stylesheet"/>
+</head>
+<body>
+<div class="container">
+    <div class="d-flex justify-content-center">
+        <div class="pt-3 col-8 d-flex justify-content-between">
+            <a href="/products" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M15 6l-6 6l6 6"/>
+                </svg>
+            </a>
+            <div class="display-flex">
+                <a href="/orders" title="Заказы" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                         class="icon icon-tabler icons-tabler-outline icon-tabler-list-check">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3.5 5.5l1.5 1.5l2.5 -2.5"/>
+                        <path d="M3.5 11.5l1.5 1.5l2.5 -2.5"/>
+                        <path d="M3.5 17.5l1.5 1.5l2.5 -2.5"/>
+                        <path d="M11 6l9 0"/>
+                        <path d="M11 12l9 0"/>
+                        <path d="M11 18l9 0"/>
+                    </svg>
+                </a>
+                <a href="/cart" title="Корзина" style="margin-left:10px" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                         class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                        <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                        <path d="M17 17h-11v-14h-2"/>
+                        <path d="M6 5l14 1l-1 7h-13"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center">
+        <div class="col-xl-8 col-lg-8 order-1 order-md-0">
+            <div class="product-section mt-5">
+                <div class="d-flex justify-content-center align-items-center flex-column">
+                    <img class="img-fluid rounded mb-4"
+                         th:src="${#strings.contains(product.image,'http')}?${product.image}:@{${'/' + product.image}}"
+                         height="400" width="400"
+                         alt="User avatar">
+                    <div class="item-body" style="padding:10px 50px">
+                        <div class="d-flex flex-column flex-wrap mt-2">
+                            <h5 class="mb-5" th:text="${product.title}"></h5>
+                            <span th:text="${product.description}"></span>
+                        </div>
+                        <div class="items-in-cart d-flex justify-content-end">
+                            <form th:if="${product.count == null}" th:action="@{${'/cart/add/' + product.id}}"
+                                  method="post"
+                                  class="d-flex justify-content-end"
+                                  style="max-width:250px">
+                                <button type="submit"
+                                        class="items-in-cart-add btn btn-outline-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                         stroke-linejoin="round"
+                                         class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart-plus">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                        <path d="M4 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/>
+                                        <path d="M12.5 17h-6.5v-14h-2"/>
+                                        <path d="M6 5l14 1l-.86 6.017m-2.64 .983h-10.5"/>
+                                        <path d="M16 19h6"/>
+                                        <path d="M19 16v6"/>
+                                    </svg>
+                                </button>
+                            </form>
+                            <div th:unless="${product.count == null}" class="items-in-cart-count btn-group">
+                                <form th:action="@{${'/cart/dec/' + product.id}}"
+                                      method="post"
+                                      class="d-flex justify-content-end"
+                                      style="max-width:250px">
+                                    <button type="submit" class="btn btn-outline-secondary">-</button>
+                                </form>
+                                <button type="button" class="btn btn-outline-secondary"
+                                        th:text="${product.count}"></button>
+                                <form th:action="@{${'/cart/inc/' + product.id}}"
+                                      method="post"
+                                      style="max-width:250px">
+                                    <button type="submit" class="btn btn-outline-secondary">+</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function addToCart(e) {
+        e.target.closest('.items-in-cart-add').style.display = 'none';
+        e.currentTarget.parentNode.querySelector('.items-in-cart-count').style.display = 'flex';
+    }
+</script>
+</body>
+</html>

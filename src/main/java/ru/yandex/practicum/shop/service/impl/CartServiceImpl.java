@@ -76,6 +76,11 @@ public class CartServiceImpl implements CartService {
         return Collections.unmodifiableMap(cart);
     }
 
+    @Override
+    public CartItem getCartItemById(Long id) {
+        return cart.get(id);
+    }
+
     public List<CartItemResponseDTO> returnCartItems() {
         return cart.values().stream()
                 .map(cartMapper::map)

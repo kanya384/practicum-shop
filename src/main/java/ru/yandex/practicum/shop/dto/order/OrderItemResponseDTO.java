@@ -8,7 +8,10 @@ import ru.yandex.practicum.shop.dto.product.ProductResponseDTO;
 @Setter
 public class OrderItemResponseDTO {
     private Long id;
-    private ProductResponseDTO productResponseDTO;
+    private ProductResponseDTO product;
     private Integer count;
-    private Integer totalPrice;
+
+    public Integer totalPrice() {
+        return count * product.getPrice();
+    }
 }

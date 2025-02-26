@@ -21,5 +21,7 @@ public interface CartService {
 
     Map<Long, CartItem> getProductsInCartMap();
 
+    CartItem getCartItemById(Long id);
+
     List<CartItemResponseDTO> returnCartItems();
 }

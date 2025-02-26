@@ -10,17 +10,32 @@
 <body>
 <div class="container">
     <div class="pt-3 d-flex justify-content-end">
-        <a class="btn btn-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                 class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
-                <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
-                <path d="M17 17h-11v-14h-2"/>
-                <path d="M6 5l14 1l-1 7h-13"/>
-            </svg>
-        </a>
+        <div class="display-flex">
+            <a href="/orders" title="Заказы" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     class="icon icon-tabler icons-tabler-outline icon-tabler-list-check">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M3.5 5.5l1.5 1.5l2.5 -2.5"/>
+                    <path d="M3.5 11.5l1.5 1.5l2.5 -2.5"/>
+                    <path d="M3.5 17.5l1.5 1.5l2.5 -2.5"/>
+                    <path d="M11 6l9 0"/>
+                    <path d="M11 12l9 0"/>
+                    <path d="M11 18l9 0"/>
+                </svg>
+            </a>
+            <a href="/cart" title="Корзина" style="margin-left:10px" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                    <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                    <path d="M17 17h-11v-14h-2"/>
+                    <path d="M6 5l14 1l-1 7h-13"/>
+                </svg>
+            </a>
+        </div>
     </div>
     <nav class="row pt-4 g-2">
         <div class="col-sm d-flex justify-content-start align-items-center mb-3">
@@ -92,13 +107,17 @@
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3 pb-5">
             <div class="col" th:each="product : ${products.list}">
                 <div class="card shadow-sm">
-                    <img class="bd-placeholder-img card-img-top"
-                         th:src="${#strings.contains(product.image,'http')}?${product.image}:@{${'/' + product.image}}"
-                    />
+                    <a th:href="@{${'/products/' + product.id}}">
+                        <img class="bd-placeholder-img card-img-top"
+                             th:src="${#strings.contains(product.image,'http')}?${product.image}:@{${'/' + product.image}}"
+                        />
+                    </a>
 
                     <div class="card-body">
                         <div class="price-text" th:text="${product.price + ' ₽'}"></div>
-                        <p class="card-text title" th:text="${product.title}"></p>
+                        <a th:href="@{${'/products/' + product.id}}">
+                            <p class="card-text title" th:text="${product.title}"></p>
+                        </a>
                         <div class="items-in-cart d-flex justify-content-end">
                             <form th:if="${product.count == null}" th:action="@{${'/cart/add/' + product.id}}"
                                   method="post"

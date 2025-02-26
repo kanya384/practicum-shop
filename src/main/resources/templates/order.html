@@ -4,158 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Заказ</title>
-    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
 </head>
 <body>
 <section class="h-100">
+    <div class="d-flex justify-content-center">
+        <div class="pt-3 col-8 d-flex justify-content-between">
+            <a href="/orders" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M15 6l-6 6l6 6"/>
+                </svg>
+            </a>
+            <div class="display-flex">
+                <a href="/orders" title="Заказы" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                         class="icon icon-tabler icons-tabler-outline icon-tabler-list-check">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3.5 5.5l1.5 1.5l2.5 -2.5"/>
+                        <path d="M3.5 11.5l1.5 1.5l2.5 -2.5"/>
+                        <path d="M3.5 17.5l1.5 1.5l2.5 -2.5"/>
+                        <path d="M11 6l9 0"/>
+                        <path d="M11 12l9 0"/>
+                        <path d="M11 18l9 0"/>
+                    </svg>
+                </a>
+                <a href="/cart" title="Корзина" style="margin-left:10px" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                         class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                        <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                        <path d="M17 17h-11v-14h-2"/>
+                        <path d="M6 5l14 1l-1 7h-13"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
     <div class="container h-100 py-5">
         <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col-10">
-
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 class="fw-normal mb-0">Заказ от 10.12.2024</h3>
-                    <h3 class="fw-normal mb-0"><span class="text-muted">Сумма: </span>1524 руб.</h3>
+                    <h3 class="fw-normal mb-0">Заказ от <span th:text="${order.createdAt}"></span></h3>
+                    <h3 class="fw-normal mb-0"><span class="text-muted">Сумма: </span><span
+                            th:text="${order.sum}"></span>
+                        руб.</h3>
                 </div>
 
-                <div class="card rounded-3 mb-4">
+                <div class="card rounded-3 mb-4" th:each="item : ${order.items}">
                     <div class="card-body p-4">
                         <div class="row d-flex justify-content-between align-items-center">
                             <div class="col-md-2 col-lg-2 col-xl-2">
                                 <img
-                                        src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"
+                                        th:src="${#strings.contains(item.product.image,'http')}?${item.product.image}:@{${'/' + item.product.image}}"
                                         class="img-fluid rounded-3" alt="Cotton T-shirt">
                             </div>
                             <div class="col-md-3 col-lg-3 col-xl-3">
-                                <p class="lead fw-normal mb-2">Basic T-shirt</p>
+                                <p class="lead fw-normal mb-2" th:text="${item.product.title}"></p>
                             </div>
 
                             <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                                <h5 class="mb-0">$499.00</h5>
+                                <h5 class="mb-0" th:text="${item.totalPrice + '₽'}"></h5>
                             </div>
 
                             <div class="col-md-3 col-lg-3 col-xl-3 d-flex justify-content-end">
-                                <p><span class="text-muted">кол-во: </span>2<br/><span class="text-muted">сумма: </span>500
-                                    р.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card rounded-3 mb-4">
-                    <div class="card-body p-4">
-                        <div class="row d-flex justify-content-between align-items-center">
-                            <div class="col-md-2 col-lg-2 col-xl-2">
-                                <img
-                                        src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"
-                                        class="img-fluid rounded-3" alt="Cotton T-shirt">
-                            </div>
-                            <div class="col-md-3 col-lg-3 col-xl-3">
-                                <p class="lead fw-normal mb-2">Basic T-shirt</p>
-                            </div>
-
-                            <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                                <h5 class="mb-0">$499.00</h5>
-                            </div>
-
-                            <div class="col-md-3 col-lg-3 col-xl-3 d-flex justify-content-end">
-                                <p><span class="text-muted">кол-во: </span>2<br/><span class="text-muted">сумма: </span>500
-                                    р.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card rounded-3 mb-4">
-                    <div class="card-body p-4">
-                        <div class="row d-flex justify-content-between align-items-center">
-                            <div class="col-md-2 col-lg-2 col-xl-2">
-                                <img
-                                        src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"
-                                        class="img-fluid rounded-3" alt="Cotton T-shirt">
-                            </div>
-                            <div class="col-md-3 col-lg-3 col-xl-3">
-                                <p class="lead fw-normal mb-2">Basic T-shirt</p>
-                            </div>
-
-                            <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                                <h5 class="mb-0">$499.00</h5>
-                            </div>
-
-                            <div class="col-md-3 col-lg-3 col-xl-3 d-flex justify-content-end">
-                                <p><span class="text-muted">кол-во: </span>2<br/><span class="text-muted">сумма: </span>500
-                                    р.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card rounded-3 mb-4">
-                    <div class="card-body p-4">
-                        <div class="row d-flex justify-content-between align-items-center">
-                            <div class="col-md-2 col-lg-2 col-xl-2">
-                                <img
-                                        src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"
-                                        class="img-fluid rounded-3" alt="Cotton T-shirt">
-                            </div>
-                            <div class="col-md-3 col-lg-3 col-xl-3">
-                                <p class="lead fw-normal mb-2">Basic T-shirt</p>
-                            </div>
-
-                            <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                                <h5 class="mb-0">$499.00</h5>
-                            </div>
-
-                            <div class="col-md-3 col-lg-3 col-xl-3 d-flex justify-content-end">
-                                <p><span class="text-muted">кол-во: </span>2<br/><span class="text-muted">сумма: </span>500
-                                    р.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card rounded-3 mb-4">
-                    <div class="card-body p-4">
-                        <div class="row d-flex justify-content-between align-items-center">
-                            <div class="col-md-2 col-lg-2 col-xl-2">
-                                <img
-                                        src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"
-                                        class="img-fluid rounded-3" alt="Cotton T-shirt">
-                            </div>
-                            <div class="col-md-3 col-lg-3 col-xl-3">
-                                <p class="lead fw-normal mb-2">Basic T-shirt</p>
-                            </div>
-
-                            <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                                <h5 class="mb-0">$499.00</h5>
-                            </div>
-
-                            <div class="col-md-3 col-lg-3 col-xl-3 d-flex justify-content-end">
-                                <p><span class="text-muted">кол-во: </span>2<br/><span class="text-muted">сумма: </span>500
-                                    р.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card rounded-3 mb-4">
-                    <div class="card-body p-4">
-                        <div class="row d-flex justify-content-between align-items-center">
-                            <div class="col-md-2 col-lg-2 col-xl-2">
-                                <img
-                                        src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"
-                                        class="img-fluid rounded-3" alt="Cotton T-shirt">
-                            </div>
-                            <div class="col-md-3 col-lg-3 col-xl-3">
-                                <p class="lead fw-normal mb-2">Basic T-shirt</p>
-                            </div>
-
-                            <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                                <h5 class="mb-0">$499.00</h5>
-                            </div>
-
-                            <div class="col-md-3 col-lg-3 col-xl-3 d-flex justify-content-end">
-                                <p><span class="text-muted">кол-во: </span>2<br/><span class="text-muted">сумма: </span>500
-                                    р.</p>
+                                <p>
+                                    <span class="text-muted">кол-во: </span>
+                                    <span th:text="${item.count}"></span><br/>
+                                    <span class="text-muted">цена: </span>
+                                    <span th:text="${item.product.price + '₽'}"></span>
+                                </p>
                             </div>
                         </div>
                     </div>

@@ -3,10 +3,9 @@ package ru.yandex.practicum.shop.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.shop.dto.cart.CartResponseDTO;
 import ru.yandex.practicum.shop.service.CartService;
 
 @Controller
@@ -14,6 +13,14 @@ import ru.yandex.practicum.shop.service.CartService;
 @RequiredArgsConstructor
 public class CartController {
     private final CartService cartService;
+
+    @GetMapping
+    public String getCartItems(Model model) {
+        CartResponseDTO cartResponseDTO = new CartResponseDTO();
+        cartResponseDTO.setItems(cartService.returnCartItems());
+        model.addAttribute("cart", cartResponseDTO);
+        return "cart";
+    }
 
     @PostMapping("/add/{productId}")
     public String addProductToCart(@RequestHeader(value = HttpHeaders.REFERER) final String referrer,

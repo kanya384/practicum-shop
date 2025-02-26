@@ -1,11 +1,10 @@
 package ru.yandex.practicum.shop.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.shop.dto.product.ProductSort;
 import ru.yandex.practicum.shop.service.ProductService;
 
@@ -35,5 +34,12 @@ public class ProductController {
         ));
 
         return "products";
+    }
+
+    @GetMapping("/{id}")
+    public String findById(@RequestHeader(value = HttpHeaders.REFERER, required = false) final String referrer,
+                           @PathVariable("id") Long productId, Model model) {
+        model.addAttribute("product", productService.findById(productId));
+        return "product";
     }
 }

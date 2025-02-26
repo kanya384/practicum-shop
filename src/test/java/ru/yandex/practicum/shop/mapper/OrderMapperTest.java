@@ -12,7 +12,8 @@ import ru.yandex.practicum.shop.model.Product;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(classes = {OrderMapperImpl.class, ProductMapperImpl.class})
 public class OrderMapperTest {
@@ -21,22 +22,24 @@ public class OrderMapperTest {
 
     @Test
     void map_shouldMapOrderToOrderResponseDTO() {
-        var order = new Order(1L, List.of(new OrderItem(1L, new Product(1L, "title", "description", "image", 100), 1)), LocalDate.now());
+        var order = new Order(1L, List.of(new OrderItem(1L, new Product(1L, "title", "description", "image", 100), null, 2)), LocalDate.now());
 
         OrderResponseDTO orderDto = orderMapper.map(order);
 
         assertNotNull(orderDto);
         assertNotNull(orderDto.getId());
         assertNotNull(orderDto.getItems());
-        assertFalse(orderDto.getItems().isEmpty());
+        assertEquals(1, orderDto.getItems().size());
+        assertEquals(2, orderDto.getItems().getFirst().getCount());
         assertNotNull(orderDto.getCreatedAt());
     }
 
     @Test
     void map_shouldMapCartItemToOrderItem() {
         var cartItem = new CartItem(new Product(1L, "title", "description", "image", 100), 1);
+        var order = new Order(1L, List.of(), LocalDate.now());
 
-        OrderItem orderItem = orderMapper.map(cartItem);
+        OrderItem orderItem = OrderMapper.map(cartItem);
 
         assertNotNull(orderItem);
         assertEquals(1L, orderItem.getProduct().getId());
