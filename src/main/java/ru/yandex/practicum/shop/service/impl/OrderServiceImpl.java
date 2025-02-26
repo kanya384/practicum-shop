@@ -55,7 +55,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderResponseDTO> findAll() {
         return orderRepository
-                .findAll()
+                .findAlOrdersWithOrderItems()
                 .stream()
                 .map(orderMapper::map)
                 .toList();

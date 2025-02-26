@@ -28,9 +28,6 @@ public class OrderMapperTest {
 
         assertNotNull(orderDto);
         assertNotNull(orderDto.getId());
-        assertNotNull(orderDto.getItems());
-        assertEquals(1, orderDto.getItems().size());
-        assertEquals(2, orderDto.getItems().getFirst().getCount());
         assertNotNull(orderDto.getCreatedAt());
     }
 

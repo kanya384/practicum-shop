@@ -11,10 +11,10 @@ import ru.yandex.practicum.shop.model.Order;
 import ru.yandex.practicum.shop.model.OrderItem;
 
 @Mapper(
-        uses = {ProductMapper.class},
+        uses = ProductMapperImpl.class,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
         componentModel = MappingConstants.ComponentModel.SPRING,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE
+        unmappedTargetPolicy = ReportingPolicy.ERROR
 )
 public abstract class OrderMapper {
     public abstract OrderResponseDTO map(Order data);

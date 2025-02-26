@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.yandex.practicum.shop.dto.order.OrderResponseDTO;
 import ru.yandex.practicum.shop.service.OrderService;
 
 @Controller
@@ -18,7 +17,7 @@ public class OrderController {
 
     @PostMapping
     public String placeOrder(Model model) {
-        OrderResponseDTO orderResponse = orderService.placeOrder();
+        var orderResponse = orderService.placeOrder();
         return "redirect:orders/" + orderResponse.getId();
     }
 
