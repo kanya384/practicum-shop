@@ -38,6 +38,7 @@
                                  baseColumnNames="order_id"
                                  referencedTableName="orders"
                                  referencedColumnNames="id"
+                                 onDelete="CASCADE"
                                  constraintName="fk_order_item_order"/>
         <rollback>
             <dropForeignKeyConstraint baseTableName="order_items" constraintName="fk_order_item_order"/>
@@ -53,6 +54,7 @@
                                  baseColumnNames="product_id"
                                  referencedTableName="products"
                                  referencedColumnNames="id"
+                                 onDelete="NO ACTION"
                                  constraintName="fk_order_item_product"/>
         <rollback>
             <dropForeignKeyConstraint baseTableName="order_items" constraintName="fk_order_item_product"/>

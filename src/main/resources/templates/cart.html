@@ -1,8 +1,8 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Корзина</title>
     <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
 </head>
@@ -43,12 +43,12 @@
                     <h3 class="fw-normal mb-0">Корзина</h3>
                 </div>
 
-                <div th:each="item : ${cart.items}" class="card rounded-3 mb-4">
+                <div th:each="item : ${cart.items}" class="cart-item card rounded-3 mb-4">
                     <div class="card-body p-4">
                         <div class="row d-flex justify-content-between align-items-center">
                             <div class="col-md-2 col-lg-2 col-xl-2">
                                 <img th:src="${#strings.contains(item.product.image,'http')}?${item.product.image}:@{${'/' + item.product.image}}"
-                                     class="img-fluid rounded-3" alt="Cotton T-shirt">
+                                     class="img-fluid rounded-3" alt="Cotton T-shirt"/>
                             </div>
                             <div class="col-md-3 col-lg-3 col-xl-3">
                                 <p class="lead fw-normal mb-2" th:text="${item.product.title}"></p>
@@ -59,7 +59,7 @@
                             </div>
 
                             <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
-                                <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
+                                <button class="btn btn-link px-2"
                                         onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
                                     <i class="fas fa-minus"></i>
                                 </button>
@@ -103,7 +103,7 @@
 
                                 </div>
 
-                                <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
+                                <button class="btn btn-link px-2"
                                         onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
                                     <i class="fas fa-plus"></i>
                                 </button>
@@ -123,7 +123,7 @@
                               method="post"
                               class="d-flex justify-content-end"
                               style="max-width:250px">
-                            <button type="submit" data-mdb-button-init data-mdb-ripple-init
+                            <button type="submit"
                                     class="btn btn-sm btn-primary btn-block btn-lg">Оформить заказ
                             </button>
                         </form>

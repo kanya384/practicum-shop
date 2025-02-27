@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.shop.dto.order.OrderResponseDTO;
+import ru.yandex.practicum.shop.exception.NoProductsInOrderException;
 import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
 import ru.yandex.practicum.shop.mapper.OrderMapper;
 import ru.yandex.practicum.shop.model.CartItem;
@@ -28,6 +29,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponseDTO placeOrder() {
         List<CartItem> cartItems = cartService.getCartItems();
+        if (cartItems.isEmpty()) {
+            throw new NoProductsInOrderException("В заказе должен быть хотя бы один товар");
+        }
 
         Order order = new Order();
 

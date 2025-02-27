@@ -1,8 +1,8 @@
-<!doctype html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Интернет магазин</title>
     <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
     <link th:href="@{/css/products.css}" rel="stylesheet"/>
@@ -43,7 +43,7 @@
                 <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.sort)}"/>
                 <input type="hidden" name="pageSize" th:value="${products.pageSize}"/>
                 <input type="text" class="form-control" placeholder="Название товара" id="search" name="search"
-                       th:value="${params.search}">
+                       th:value="${params.search}"/>
                 <button type="submit" class="input-group-append" style="cursor:pointer; padding:0; border: none">
                     <span class="input-group-text" id="basic-addon2"><svg xmlns="http://www.w3.org/2000/svg" width="25"
                                                                           height="25" viewBox="0 0 25 25" fill="none"
@@ -73,7 +73,7 @@
                     <a class="page-link"
                        th:href="@{${'/products?page=' + (products.page - 1) + '&pageSize='+ products.pageSize + '&search=' + params.search + '&sort=' + #strings.toLowerCase(params.sort)}}"
                        aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
+                        <span aria-hidden="true"><</span>
                     </a>
                 </li>
                 <li class="page-item">
@@ -86,7 +86,7 @@
                     <a class="page-link"
                        th:href="@{${'/products?page=' + (products.page + 1) + '&pageSize='+ products.pageSize + '&search=' + params.search + '&sort=' + #strings.toLowerCase(params.sort)}}"
                        aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
+                        <span aria-hidden="true">></span>
                     </a>
                 </li>
             </ul>
@@ -105,7 +105,7 @@
     </nav>
     <div class="container">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3 pb-5">
-            <div class="col" th:each="product : ${products.list}">
+            <div class="product col" th:each="product : ${products.list}">
                 <div class="card shadow-sm">
                     <a th:href="@{${'/products/' + product.id}}">
                         <img class="bd-placeholder-img card-img-top"

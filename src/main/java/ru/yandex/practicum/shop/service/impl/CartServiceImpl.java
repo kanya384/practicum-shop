@@ -36,6 +36,10 @@ public class CartServiceImpl implements CartService {
     }
 
     public void removeItemFromCart(Long productId) {
+        if (!cart.containsKey(productId)) {
+            throw new ResourceNotFoundException("Продукт", productId);
+        }
+
         cart.remove(productId);
     }
 
