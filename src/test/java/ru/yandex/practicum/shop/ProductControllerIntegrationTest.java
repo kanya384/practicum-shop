@@ -27,7 +27,7 @@ public class ProductControllerIntegrationTest {
     }
 
     @Test
-    void findById_shouldReturnProductByIdList() throws Exception {
+    void findById_shouldReturnProductById() throws Exception {
         mockMvc.perform(get("/products/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("text/html;charset=UTF-8"))
