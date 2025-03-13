@@ -7,10 +7,10 @@
     <changeSet id="create_order_item_table" author="laurkan">
         <preConditions>
             <not>
-                <tableExists tableName="order_items"/>
+                <tableExists tableName="order_item"/>
             </not>
         </preConditions>
-        <createTable tableName="order_items">
+        <createTable tableName="order_item">
             <column name="id" type="bigserial">
                 <constraints primaryKey="true"/>
             </column>
@@ -25,7 +25,7 @@
             </column>
         </createTable>
         <rollback>
-            <dropTable tableName="orders"/>
+            <dropTable tableName="order"/>
         </rollback>
     </changeSet>
     <changeSet id="create_order_item_foreign_key_order" author="laurkan">
@@ -34,14 +34,14 @@
                 <foreignKeyConstraintExists foreignKeyName="fk_order_item_order"/>
             </not>
         </preConditions>
-        <addForeignKeyConstraint baseTableName="order_items"
+        <addForeignKeyConstraint baseTableName="order_item"
                                  baseColumnNames="order_id"
-                                 referencedTableName="orders"
+                                 referencedTableName="order"
                                  referencedColumnNames="id"
                                  onDelete="CASCADE"
                                  constraintName="fk_order_item_order"/>
         <rollback>
-            <dropForeignKeyConstraint baseTableName="order_items" constraintName="fk_order_item_order"/>
+            <dropForeignKeyConstraint baseTableName="order_item" constraintName="fk_order_item_order"/>
         </rollback>
     </changeSet>
     <changeSet id="create_order_item_foreign_key_product" author="laurkan">
@@ -50,14 +50,14 @@
                 <foreignKeyConstraintExists foreignKeyName="fk_order_item_product"/>
             </not>
         </preConditions>
-        <addForeignKeyConstraint baseTableName="order_items"
+        <addForeignKeyConstraint baseTableName="order_item"
                                  baseColumnNames="product_id"
-                                 referencedTableName="products"
+                                 referencedTableName="product"
                                  referencedColumnNames="id"
                                  onDelete="NO ACTION"
                                  constraintName="fk_order_item_product"/>
         <rollback>
-            <dropForeignKeyConstraint baseTableName="order_items" constraintName="fk_order_item_product"/>
+            <dropForeignKeyConstraint baseTableName="order_item" constraintName="fk_order_item_product"/>
         </rollback>
     </changeSet>
 </databaseChangeLog>

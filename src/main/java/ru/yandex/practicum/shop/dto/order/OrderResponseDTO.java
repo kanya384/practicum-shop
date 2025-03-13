@@ -1,13 +1,15 @@
 package ru.yandex.practicum.shop.dto.order;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrderResponseDTO {
     private Long id;
     private List<OrderItemResponseDTO> items;

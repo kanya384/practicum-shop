@@ -5,8 +5,11 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import ru.yandex.practicum.shop.exception.AlreadyExistsInCartException;
 import ru.yandex.practicum.shop.exception.NoItemInCartException;
+import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
 import ru.yandex.practicum.shop.mapper.CartMapperImpl;
 import ru.yandex.practicum.shop.mapper.ProductMapperImpl;
 import ru.yandex.practicum.shop.model.Cart;
@@ -15,13 +18,15 @@ import ru.yandex.practicum.shop.model.Product;
 import ru.yandex.practicum.shop.repository.ProductRepository;
 import ru.yandex.practicum.shop.service.CartService;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = {CartServiceImpl.class, Cart.class, CartMapperImpl.class, ProductMapperImpl.class})
 public class CartServiceImplTest {
+    @Autowired
+    private Cart cart;
+
     @Autowired
     private CartService cartService;
 
@@ -31,89 +36,107 @@ public class CartServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        cartService.clearCart();
-        when(productRepository.findById(1L))
-                .thenReturn(Optional.of(new Product(2L, "title", "description", "image", 100)));
-        cartService.addItemToCart(1L);
+        cart.clear();
+
+        Product product = new Product(1L, "title", "description", "image", 100);
+
+        cart.put(1L, new CartItem(product, 1));
     }
 
     @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
     void addItemToCart_shouldAdd() {
-        when(productRepository.findById(2L))
-                .thenReturn(Optional.of(new Product(2L, "title", "description", "image", 100)));
+        when(productRepository.findById(any(Long.class)))
+                .thenReturn(Mono.just(new Product(2L, "title", "description", "image", 100)));
 
-        cartService.addItemToCart(2L);
+        StepVerifier.create(cartService.addItemToCart(2L))
+                .verifyComplete();
 
-        assertEquals(2, cartService.getCartItems().size());
+        assertEquals(2, cart.size());
+    }
+
+    @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
+    void addItemToCart_shouldThrowExceptionIfNoItemInRepository() {
+        when(productRepository.findById(any(Long.class)))
+                .thenReturn(Mono.empty());
+
+        StepVerifier.create(cartService.addItemToCart(2L))
+                .expectError(ResourceNotFoundException.class)
+                .verify();
     }
 
     @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
     void addItemToCart_shouldThrowExceptionIfItemAlreadyExistsInCart() {
-        assertThrows(AlreadyExistsInCartException.class,
-                () -> cartService.addItemToCart(
-                        1L));
+        StepVerifier.create(cartService.addItemToCart(1L))
+                .expectError(AlreadyExistsInCartException.class)
+                .verify();
     }
 
     @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
     void removeItemFromCart_shouldRemoveItem() {
-        cartService.removeItemFromCart(1L);
-        assertEquals(0, cartService.getCartItems().size());
+        StepVerifier.create(cartService.removeItemFromCart(1L))
+                .verifyComplete();
+
+        assertEquals(0, cart.size());
+    }
+
+    @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
+    void removeItemFromCart_shouldThrowExceptionIfNoItemWithProvidedId() {
+        StepVerifier.create(cartService.removeItemFromCart(2L))
+                .expectError(ResourceNotFoundException.class)
+                .verify();
     }
 
     @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
     void increaseItemCount_shouldIncreaseItemCount() {
-        cartService.increaseItemCount(1L);
+        assertEquals(1, cart.get(1L).getCount());
 
-        CartItem increasedItem = cartService.getCartItemById(1L);
+        StepVerifier.create(cartService.increaseItemCount(1L))
+                .verifyComplete();
 
-        assertNotNull(increasedItem);
-        assertEquals(2, increasedItem.getCount());
+        assertEquals(2, cart.get(1L).getCount());
     }
 
     @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
     void increaseItemCount_shouldThrowExceptionIfNoItemWithProvidedId() {
-        assertThrows(NoItemInCartException.class,
-                () -> cartService.increaseItemCount(2L));
+        StepVerifier.create(cartService.increaseItemCount(2L))
+                .expectError(NoItemInCartException.class)
+                .verify();
     }
 
     @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
     void decreaseItemCount_shouldDecreaseItemCount() {
-        when(productRepository.findById(2L))
-                .thenReturn(Optional.of(new Product(2L, "title", "description", "image", 100)));
+        cartService.increaseItemCount(1L)
+                .block();
 
-        cartService.addItemToCart(2L);
-        cartService.increaseItemCount(2L);
+        assertEquals(2, cart.get(1L).getCount());
 
-        CartItem item = cartService.getCartItemById(2L);
+        StepVerifier
+                .create(cartService.decreaseItemCount(1L))
+                .verifyComplete();
 
-        assertNotNull(item);
-        assertEquals(2, item.getCount());
-
-        cartService.decreaseItemCount(2L);
-
-        CartItem decreasedItem = cartService.getCartItemById(2L);
-
-        assertNotNull(decreasedItem);
-        assertEquals(1, decreasedItem.getCount());
+        assertEquals(1, cart.get(1L).getCount());
     }
 
     @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
     void decreaseItemCount_shouldRemoveOnDecreaseIfZeroCount() {
-        cartService.decreaseItemCount(1L);
 
-        assertEquals(0, cartService.getCartItems().size());
+        StepVerifier.create(cartService.decreaseItemCount(1L))
+                .verifyComplete();
+
+        assertEquals(0, cart.size());
     }
 
     @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
     void decreaseItemCount_shouldThrowExceptionIfNoItemWithProvidedId() {
-        assertThrows(NoItemInCartException.class,
-                () -> cartService.decreaseItemCount(2L));
+        StepVerifier.create(cartService.decreaseItemCount(2L))
+                .expectError(NoItemInCartException.class);
     }
 
     @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
     void clearCart_shouldClearCart() {
-        cartService.clearCart();
+        StepVerifier.create(cartService.clearCart())
+                .verifyComplete();
 
-        assertEquals(0, cartService.getCartItems().size());
+        assertEquals(0, cart.size());
     }
 }

@@ -3,19 +3,17 @@ package ru.yandex.practicum.shop.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.shop.dto.order.OrderResponseDTO;
 import ru.yandex.practicum.shop.exception.NoProductsInOrderException;
-import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
 import ru.yandex.practicum.shop.mapper.OrderMapper;
-import ru.yandex.practicum.shop.model.CartItem;
 import ru.yandex.practicum.shop.model.Order;
 import ru.yandex.practicum.shop.model.OrderItem;
 import ru.yandex.practicum.shop.repository.OrderItemRepository;
 import ru.yandex.practicum.shop.repository.OrderRepository;
 import ru.yandex.practicum.shop.service.CartService;
 import ru.yandex.practicum.shop.service.OrderService;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,42 +25,36 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     @Override
-    public OrderResponseDTO placeOrder() {
-        List<CartItem> cartItems = cartService.getCartItems();
-        if (cartItems.isEmpty()) {
-            throw new NoProductsInOrderException("В заказе должен быть хотя бы один товар");
-        }
-
+    public Mono<OrderResponseDTO> placeOrder() {
         Order order = new Order();
 
-        cartItems.forEach(cartItem -> {
-            OrderItem orderItem = OrderMapper.map(cartItem);
-            orderItem.setOrder(order);
-            order.addItem(orderItem);
-        });
-
-        orderRepository.save(order);
-        orderItemRepository.saveAll(order.getItems());
-
-        cartService.clearCart();
-
-        return orderMapper.map(order);
+        return cartService.getCartItems()
+                .switchIfEmpty(Mono.error(new NoProductsInOrderException("В заказе должен быть хотя бы один товар")))
+                .doOnNext(cartItem -> {
+                            OrderItem orderItem = OrderMapper.map(cartItem);
+                            orderItem.setOrder(order);
+                            order.addItem(orderItem);
+                        }
+                )
+                .collectList()
+                .flatMap(__ -> orderRepository.save(order))
+                .switchIfEmpty(Mono.error(new InternalError("Ошибка сохранения заказа")))
+                .doOnNext(o -> orderItemRepository.saveAll(order.getItems()))
+                .switchIfEmpty(Mono.error(new InternalError("Ошибка сохранения заказа")))
+                .doOnNext(o -> cartService.clearCart())
+                .map(orderMapper::map);
     }
 
     @Override
-    public OrderResponseDTO findById(Long id) {
+    public Mono<OrderResponseDTO> findById(Long id) {
         return orderRepository.findById(id)
-                .map(orderMapper::map)
-                .orElseThrow(() -> new ResourceNotFoundException("Заказ", id));
+                .map(orderMapper::map);
     }
 
     @Override
-    public List<OrderResponseDTO> findAll() {
+    public Flux<OrderResponseDTO> findAll() {
         return orderRepository
                 .findAlOrdersWithOrderItems()
-                .stream()
-                .map(orderMapper::map)
-                .toList();
+                .map(orderMapper::map);
     }
-
 }

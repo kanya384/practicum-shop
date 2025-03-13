@@ -1,11 +1,8 @@
 package ru.yandex.practicum.shop.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.shop.dto.cart.CartResponseDTO;
+import org.springframework.web.bind.annotation.RequestMapping;
 import ru.yandex.practicum.shop.service.CartService;
 
 @Controller
@@ -14,7 +11,7 @@ import ru.yandex.practicum.shop.service.CartService;
 public class CartController {
     private final CartService cartService;
 
-    @GetMapping
+    /*@GetMapping
     public String getCartItems(Model model) {
         CartResponseDTO cartResponseDTO = new CartResponseDTO();
         cartResponseDTO.setItems(cartService.returnCartItems());
@@ -48,5 +45,5 @@ public class CartController {
                                     @PathVariable("productId") Long productId) {
         cartService.decreaseItemCount(productId);
         return "redirect:" + referrer;
-    }
+    }*/
 }

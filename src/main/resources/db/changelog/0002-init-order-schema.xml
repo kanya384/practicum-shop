@@ -6,10 +6,10 @@
     <changeSet id="create_order_table" author="laurkan">
         <preConditions>
             <not>
-                <tableExists tableName="orders"/>
+                <tableExists tableName="order"/>
             </not>
         </preConditions>
-        <createTable tableName="orders">
+        <createTable tableName="order">
             <column name="id" type="bigserial">
                 <constraints primaryKey="true"/>
             </column>
@@ -18,7 +18,7 @@
             </column>
         </createTable>
         <rollback>
-            <dropTable tableName="orders"/>
+            <dropTable tableName="order"/>
         </rollback>
     </changeSet>
 </databaseChangeLog>

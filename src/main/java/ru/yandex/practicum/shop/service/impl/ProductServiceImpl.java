@@ -2,19 +2,22 @@ package ru.yandex.practicum.shop.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.shop.dto.product.*;
 import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
 import ru.yandex.practicum.shop.mapper.ProductMapper;
 import ru.yandex.practicum.shop.model.CartItem;
+import ru.yandex.practicum.shop.model.Product;
 import ru.yandex.practicum.shop.repository.ProductRepository;
 import ru.yandex.practicum.shop.service.CartService;
 import ru.yandex.practicum.shop.service.ProductService;
 import ru.yandex.practicum.shop.utils.StorageUtil;
 
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -26,73 +29,81 @@ public class ProductServiceImpl implements ProductService {
     private final StorageUtil storageUtil;
 
     @Transactional
-    public void save(ProductCreateDTO data) {
-        var product = productMapper.map(data);
-        String imageFileName = storageUtil.store(data.getFile());
-        product.setImage(imageFileName);
-
-        productRepository.save(product);
+    @Override
+    public Mono<ProductResponseDTO> save(ProductCreateDTO data) {
+        return Mono.just(productMapper.map(data))
+                .doOnNext(p -> {
+                    String imageFileName = storageUtil.store(data.getFile());
+                    p.setImage(imageFileName);
+                })
+                .doOnNext(productRepository::save)
+                .map(productMapper::map);
     }
 
     @Transactional
     @Override
-    public ProductResponseDTO update(Long id, ProductUpdateDTO data) {
-        var product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Продукт", id));
-
-        productMapper.update(data, product);
-
-        if (data.getImage().isPresent()) {
-            String imageFileName = storageUtil.store(data.getImage().get());
-            product.setImage(imageFileName);
-        }
-
-        productRepository.save(product);
-
-        return productMapper.map(product);
+    public Mono<ProductResponseDTO> update(Long id, ProductUpdateDTO data) {
+        return productRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Продукт", id)))
+                .map(p -> {
+                            productMapper.update(data, p);
+                            if (data.getImage().isPresent()) {
+                                String imageFileName = storageUtil.store(data.getImage().get());
+                                p.setImage(imageFileName);
+                            }
+                            return p;
+                        }
+                )
+                .flatMap(productRepository::save)
+                .map(productMapper::map);
     }
 
     @Override
-    public ProductResponseDTO findById(Long id) {
-        ProductResponseDTO product = productRepository
-                .findById(id)
+    public Mono<ProductResponseDTO> findById(Long id) {
+
+        return productRepository.findById(id)
                 .map(productMapper::map)
-                .orElseThrow(() -> new ResourceNotFoundException("Продукт", id));
-
-        CartItem cartItem = cartService.getCartItemById(id);
-
-        if (cartItem != null) {
-            product.setCount(cartItem.getCount());
-        }
-        
-        return product;
+                .zipWith(cartService.getCartItemById(id)
+                        .defaultIfEmpty(CartItem.builder()
+                                .count(0)
+                                .build()))
+                .map(z -> {
+                    z.getT1().setCount(z.getT2().getCount());
+                    return z.getT1();
+                })
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Продукт", id)));
     }
 
     @Override
-    public ProductsPageResponseDTO findAll(String search, int page, int pageSize, ProductSort productSort) {
-        ProductsPageResponseDTO result = new ProductsPageResponseDTO();
-        result.setPage(page);
-        result.setPageSize(pageSize);
-
+    public Mono<ProductsPageResponseDTO> findAll(String search, int page, int pageSize, ProductSort sort) {
+        Pageable pageable = PageRequest.of(page, pageSize, toDbSort(sort));
         Map<Long, CartItem> productsInCartMap = cartService.getProductsInCartMap();
 
-        if (search != null && !search.isEmpty()) {
-            result.setList(setCountOfProductsInCart(productRepository
-                    .findAllByTitleOrDescription(search, PageRequest.of(page - 1, pageSize, toDbSort(productSort)))
-                    .stream()
-                    .map(productMapper::map)
-                    .toList(), productsInCartMap));
-            result.setTotalCount(productRepository.countAllByTitleOrDescription(search));
-        } else {
-            result.setList(setCountOfProductsInCart(productRepository
-                    .findAll(PageRequest.of(page - 1, pageSize, toDbSort(productSort)))
-                    .stream()
-                    .map(productMapper::map)
-                    .toList(), productsInCartMap));
-            result.setTotalCount(productRepository.countAll());
-        }
+        Flux<Product> products = search != null && !search.isEmpty() ?
+                this.productRepository.findAllByTitleOrDescription(search, pageable)
+                : this.productRepository.findAllBy(pageable);
 
-        return result;
+        Mono<Integer> count = search != null && !search.isEmpty() ?
+                this.productRepository.countAllByTitleOrDescription(search)
+                : this.productRepository.countAll();
+
+
+        return products
+                .map(productMapper::map)
+                .map(p -> {
+                    if (productsInCartMap.containsKey(p.getId())) {
+                        p.setCount(p.getCount());
+                    }
+                    return p;
+                })
+                .collectList()
+                .zipWith(count)
+                .map(p -> ProductsPageResponseDTO.builder()
+                        .list(p.getT1())
+                        .page(page)
+                        .totalCount(p.getT2())
+                        .pageSize(pageSize)
+                        .build());
     }
 
     private Sort toDbSort(ProductSort productSort) {
@@ -101,18 +112,5 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return Sort.by(Sort.Direction.ASC, productSort.toString().toLowerCase());
-    }
-
-    private List<ProductResponseDTO> setCountOfProductsInCart(List<ProductResponseDTO> list, Map<Long, CartItem> cartItems) {
-        list.forEach((product) -> {
-            CartItem cartItem = cartItems.get(product.getId());
-            if (cartItem == null) {
-                return;
-            }
-
-            product.setCount(cartItem.getCount());
-        });
-
-        return list;
     }
 }

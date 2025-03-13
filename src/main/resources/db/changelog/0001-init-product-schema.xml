@@ -7,10 +7,10 @@
     <changeSet id="create_product_table" author="laurkan">
         <preConditions>
             <not>
-                <tableExists tableName="products"/>
+                <tableExists tableName="product"/>
             </not>
         </preConditions>
-        <createTable tableName="products">
+        <createTable tableName="product">
             <column name="id" type="bigserial">
                 <constraints primaryKey="true"/>
             </column>
@@ -28,7 +28,7 @@
             </column>
         </createTable>
         <rollback>
-            <dropTable tableName="products"/>
+            <dropTable tableName="product"/>
         </rollback>
     </changeSet>
 </databaseChangeLog>

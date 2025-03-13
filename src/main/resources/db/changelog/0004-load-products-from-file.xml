@@ -4,7 +4,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
     <changeSet id="Load data from CSV file" author="laurkan">
-        <loadData tableName="products" file="data.csv">
+        <loadData tableName="product" file="data.csv">
             <column name="US_ID" header="id"/>
             <column name="US_CREATION_DATE" header="creationDate"/>
             <column name="US_NAME" header="name"/>

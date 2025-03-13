@@ -1,13 +1,13 @@
 package ru.yandex.practicum.shop.service;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.shop.dto.order.OrderResponseDTO;
 
-import java.util.List;
-
 public interface OrderService {
-    OrderResponseDTO placeOrder();
+    Mono<OrderResponseDTO> placeOrder();
 
-    OrderResponseDTO findById(Long id);
+    Mono<OrderResponseDTO> findById(Long id);
 
-    List<OrderResponseDTO> findAll();
+    Flux<OrderResponseDTO> findAll();
 }

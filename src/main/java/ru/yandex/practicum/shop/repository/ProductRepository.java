@@ -1,21 +1,23 @@
 package ru.yandex.practicum.shop.repository;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.r2dbc.repository.Query;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.shop.model.Product;
 
-import java.util.List;
-
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends R2dbcRepository<Product, Long> {
+    Flux<Product> findAllBy(Pageable pageable);
+
     @Query("SELECT p FROM Product p WHERE lower(p.title) like lower(concat('%', :search, '%')) or lower(p.description) like lower(concat('%', :search, '%'))")
-    List<Product> findAllByTitleOrDescription(String search, PageRequest pageRequest);
+    Flux<Product> findAllByTitleOrDescription(String search, Pageable pageable);
 
     @Query("SELECT count(*) FROM Product p WHERE lower(p.title) like lower(concat('%', :search, '%')) or lower(p.description) like lower(concat('%', :search, '%'))")
-    Integer countAllByTitleOrDescription(String search);
+    Mono<Integer> countAllByTitleOrDescription(String search);
 
     @Query("SELECT count(*) FROM Product")
-    Integer countAll();
+    Mono<Integer> countAll();
 }

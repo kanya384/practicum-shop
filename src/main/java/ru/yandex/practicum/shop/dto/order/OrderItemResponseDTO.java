@@ -1,11 +1,13 @@
 package ru.yandex.practicum.shop.dto.order;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import ru.yandex.practicum.shop.dto.product.ProductResponseDTO;
 
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderItemResponseDTO {
     private Long id;
     private ProductResponseDTO product;

@@ -1,27 +1,28 @@
 package ru.yandex.practicum.shop.service;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.shop.dto.cart.CartItemResponseDTO;
 import ru.yandex.practicum.shop.model.CartItem;
 
-import java.util.List;
 import java.util.Map;
 
 public interface CartService {
-    void addItemToCart(Long productId);
+    Mono<Void> addItemToCart(Long productId);
 
-    void removeItemFromCart(Long productId);
+    Mono<Void> removeItemFromCart(Long productId);
 
-    void increaseItemCount(Long productId);
+    Mono<Void> increaseItemCount(Long productId);
 
-    void decreaseItemCount(Long productId);
+    Mono<Void> decreaseItemCount(Long productId);
 
-    void clearCart();
+    Mono<Void> clearCart();
 
-    List<CartItem> getCartItems();
+    Flux<CartItem> getCartItems();
 
     Map<Long, CartItem> getProductsInCartMap();
 
-    CartItem getCartItemById(Long id);
+    Mono<CartItem> getCartItemById(Long id);
 
-    List<CartItemResponseDTO> returnCartItems();
+    Flux<CartItemResponseDTO> returnCartItems();
 }

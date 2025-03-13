@@ -1,28 +1,14 @@
 package ru.yandex.practicum.shop;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.shop.dto.order.OrderResponseDTO;
-import ru.yandex.practicum.shop.repository.OrderRepository;
-import ru.yandex.practicum.shop.service.CartService;
-import ru.yandex.practicum.shop.service.OrderService;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class OrderControllerIntegrationTest {
-    @Autowired
+    /*@Autowired
     MockMvc mockMvc;
 
     @Autowired
@@ -93,7 +79,7 @@ public class OrderControllerIntegrationTest {
         mockMvc.perform(get("/orders/{id}", -1))
                 .andExpect(status().isNotFound())
                 .andExpect(view().name("oops"));
-    }
+    }*/
 
 
 }
