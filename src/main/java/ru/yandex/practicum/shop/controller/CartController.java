@@ -1,8 +1,11 @@
 package ru.yandex.practicum.shop.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.shop.service.CartService;
 
 @Controller
@@ -11,19 +14,20 @@ import ru.yandex.practicum.shop.service.CartService;
 public class CartController {
     private final CartService cartService;
 
-    /*@GetMapping
+    @GetMapping
     public String getCartItems(Model model) {
-        CartResponseDTO cartResponseDTO = new CartResponseDTO();
-        cartResponseDTO.setItems(cartService.returnCartItems());
-        model.addAttribute("cart", cartResponseDTO);
+        model.addAttribute("items", cartService.getCartItems());
+        model.addAttribute("sum", cartService.getCartItems()
+                .stream().map(ci -> ci.getCount() * ci.getProduct().getPrice())
+                .reduce(0, Integer::sum));
         return "cart";
     }
 
     @PostMapping("/add/{productId}")
-    public String addProductToCart(@RequestHeader(value = HttpHeaders.REFERER) final String referrer,
-                                   @PathVariable("productId") Long productId) {
-        cartService.addItemToCart(productId);
-        return "redirect:" + referrer;
+    public Mono<String> addProductToCart(@RequestHeader(value = HttpHeaders.REFERER) final String referrer,
+                                         @PathVariable("productId") Long productId) {
+        return cartService.addItemToCart(productId)
+                .flatMap(p -> Mono.just("cart"));
     }
 
     @PostMapping("/remove/{productId}")
@@ -45,5 +49,5 @@ public class CartController {
                                     @PathVariable("productId") Long productId) {
         cartService.decreaseItemCount(productId);
         return "redirect:" + referrer;
-    }*/
+    }
 }

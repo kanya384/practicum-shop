@@ -15,6 +15,7 @@ import ru.yandex.practicum.shop.repository.ProductRepository;
 import ru.yandex.practicum.shop.service.CartService;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -83,8 +84,8 @@ public class CartServiceImpl implements CartService {
         return Mono.fromRunnable(cart::clear);
     }
 
-    public Flux<CartItem> getCartItems() {
-        return Flux.fromIterable(cart.values().stream().toList());
+    public List<CartItem> getCartItems() {
+        return cart.values().stream().toList();
     }
 
     @Override

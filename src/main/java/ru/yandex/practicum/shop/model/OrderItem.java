@@ -1,33 +1,27 @@
 package ru.yandex.practicum.shop.model;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-@Entity
-@Table(name = "order_items")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "order_item")
 public class OrderItem {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @Column("product_id")
+    private Long productId;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    @Column("order_id")
+    private Long orderId;
 
     private Integer count;
-
-    public Integer getTotalPrice() {
-        return product.getPrice() * count;
-    }
 }

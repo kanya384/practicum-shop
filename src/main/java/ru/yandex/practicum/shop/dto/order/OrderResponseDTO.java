@@ -14,10 +14,5 @@ public class OrderResponseDTO {
     private Long id;
     private List<OrderItemResponseDTO> items;
     private LocalDate createdAt;
-
-    public Integer sum() {
-        return items.stream()
-                .mapToInt(OrderItemResponseDTO::totalPrice)
-                .sum();
-    }
+    private Integer sum;
 }

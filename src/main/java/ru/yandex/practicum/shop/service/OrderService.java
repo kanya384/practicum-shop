@@ -5,7 +5,7 @@ import reactor.core.publisher.Mono;
 import ru.yandex.practicum.shop.dto.order.OrderResponseDTO;
 
 public interface OrderService {
-    Mono<OrderResponseDTO> placeOrder();
+    Mono<Long> placeOrder();
 
     Mono<OrderResponseDTO> findById(Long id);
 

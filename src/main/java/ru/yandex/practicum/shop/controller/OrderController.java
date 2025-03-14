@@ -2,7 +2,12 @@ package ru.yandex.practicum.shop.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.shop.service.OrderService;
 
 @Controller
@@ -11,10 +16,10 @@ import ru.yandex.practicum.shop.service.OrderService;
 public class OrderController {
     private final OrderService orderService;
 
-    /*@PostMapping
-    public String placeOrder(Model model) {
-        var orderResponse = orderService.placeOrder();
-        return "redirect:orders/" + orderResponse.getId();
+    @PostMapping
+    public Mono<String> placeOrder(Model model) {
+        return orderService.placeOrder()
+                .flatMap(o -> Mono.just("orders"));
     }
 
     @GetMapping
@@ -24,8 +29,8 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public String findById(@PathVariable Long id, Model model) {
+    public Mono<String> findById(@PathVariable Long id, Model model) {
         model.addAttribute("order", orderService.findById(id));
-        return "order";
-    }*/
+        return Mono.just("order");
+    }
 }

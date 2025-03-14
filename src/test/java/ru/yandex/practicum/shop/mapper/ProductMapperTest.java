@@ -22,7 +22,7 @@ public class ProductMapperTest {
         var data = new ProductCreateDTO("title", "description", new MockMultipartFile("image", "image.jpg", "image/jpg",
                 "some image".getBytes()), 100);
 
-        Product product = productMapper.map(data);
+        Product product = productMapper.mapCreate(data);
 
         assertNotNull(product);
         assertNull(product.getId());

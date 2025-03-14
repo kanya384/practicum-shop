@@ -58,7 +58,7 @@ public class ProductServiceImplTest {
                 .price(product.getPrice())
                 .build();
 
-        when(productMapper.map(any(ProductCreateDTO.class)))
+        when(productMapper.mapCreate(any(ProductCreateDTO.class)))
                 .thenReturn(product);
 
         when(productRepository.save(any(Product.class)))
@@ -73,7 +73,7 @@ public class ProductServiceImplTest {
                 .expectNext(productResponse)
                 .verifyComplete();
 
-        verify(productMapper, times(1)).map(any(ProductCreateDTO.class));
+        verify(productMapper, times(1)).mapCreate(any(ProductCreateDTO.class));
         verify(productMapper, times(1)).map(any(Product.class));
         verify(productRepository, times(1)).save(any(Product.class));
         verify(storageUtil, times(1)).store(any(MultipartFile.class));

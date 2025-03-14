@@ -6,10 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
+import reactor.test.StepVerifier;
 import ru.yandex.practicum.shop.AbstractTestContainer;
 import ru.yandex.practicum.shop.model.Product;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -27,25 +26,24 @@ public class ProductRepositoryTest extends AbstractTestContainer {
 
     @Test
     void findAllByTitleOrDescription_shouldReturnAllProductsFilteredByTitleOrDescription() {
-        productRepository
-                .findAllByTitleOrDescription("test", PageRequest.of(0, 100))
-                .count()
-                .doOnNext(count -> assertEquals(2, count))
-                .block();
+        StepVerifier.create(productRepository
+                        .findAllByTitleOrDescription("test", PageRequest.of(0, 100)))
+                .expectNextCount(2)
+                .verifyComplete();
     }
 
     @Test
     void countAllByTitleOrDescription_shouldReturnCountOfProductsFilteredByTitleOrDescription() {
-        productRepository
-                .countAllByTitleOrDescription("test")
-                .doOnNext(count -> assertEquals(2, count))
-                .block();
+        StepVerifier.create(productRepository
+                        .countAllByTitleOrDescription("test"))
+                .expectNext(2)
+                .verifyComplete();
     }
 
     @Test
     void countAll_shouldReturnCountOfProducts() {
-        productRepository.countAll()
-                .doOnNext(res -> assertEquals(2, res))
-                .block();
+        StepVerifier.create(productRepository.countAll())
+                .expectNext(2)
+                .verifyComplete();
     }
 }

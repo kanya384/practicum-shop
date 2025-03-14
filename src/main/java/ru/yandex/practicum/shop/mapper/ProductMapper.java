@@ -14,7 +14,7 @@ import ru.yandex.practicum.shop.model.Product;
 )
 public abstract class ProductMapper {
     @Mapping(target = "image", ignore = true)
-    public abstract Product map(ProductCreateDTO data);
+    public abstract Product mapCreate(ProductCreateDTO data);
 
     @Mapping(target = "count", ignore = true)
     public abstract ProductResponseDTO map(Product product);

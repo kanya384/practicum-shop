@@ -8,17 +8,16 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import ru.yandex.practicum.shop.dto.order.OrderItemResponseDTO;
-import ru.yandex.practicum.shop.dto.order.OrderResponseDTO;
-import ru.yandex.practicum.shop.dto.product.ProductResponseDTO;
 import ru.yandex.practicum.shop.exception.NoProductsInOrderException;
-import ru.yandex.practicum.shop.mapper.OrderMapper;
+import ru.yandex.practicum.shop.mapper.OrderMapperImpl;
 import ru.yandex.practicum.shop.mapper.ProductMapperImpl;
 import ru.yandex.practicum.shop.model.CartItem;
 import ru.yandex.practicum.shop.model.Order;
+import ru.yandex.practicum.shop.model.OrderItem;
 import ru.yandex.practicum.shop.model.Product;
 import ru.yandex.practicum.shop.repository.OrderItemRepository;
 import ru.yandex.practicum.shop.repository.OrderRepository;
+import ru.yandex.practicum.shop.repository.ProductRepository;
 import ru.yandex.practicum.shop.service.CartService;
 import ru.yandex.practicum.shop.service.OrderService;
 
@@ -27,19 +26,19 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = {OrderServiceImpl.class, ProductMapperImpl.class})
+@SpringBootTest(classes = {OrderServiceImpl.class, ProductMapperImpl.class, OrderMapperImpl.class})
 public class OrderServiceImplTest {
     @MockitoBean
     private OrderRepository orderRepository;
+
+    @MockitoBean
+    private ProductRepository productRepository;
 
     @MockitoBean
     private OrderItemRepository orderItemRepository;
 
     @MockitoBean
     private CartService cartService;
-
-    @MockitoBean
-    private OrderMapper orderMapper;
 
     @Autowired
     private OrderService orderService;
@@ -55,29 +54,17 @@ public class OrderServiceImplTest {
     void placeOrder_shouldPlaceOrder() {
         var product = new Product(1L, "title", "description", "image", 1);
         when(cartService.getCartItems())
-                .thenReturn(Flux.just(new CartItem(product, 1)));
+                .thenReturn(List.of(new CartItem(product, 1)));
 
         when(orderRepository.save(any(Order.class)))
-                .thenReturn(Mono.just(new Order(1L, List.of(), LocalDate.now())));
+                .thenReturn(Mono.just(new Order(1L, LocalDate.now())));
 
-        var orderResponse = OrderResponseDTO.builder()
-                .id(1L)
-                .items(List.of(OrderItemResponseDTO.builder()
-                        .id(1L)
-                        .product(ProductResponseDTO.builder()
-                                .id(product.getId())
-                                .title(product.getTitle())
-                                .description(product.getDescription())
-                                .build())
-                        .build()))
-                .createdAt(LocalDate.now())
-                .build();
 
-        when(orderMapper.map(any(Order.class)))
-                .thenReturn(orderResponse);
+        when(orderItemRepository.saveAll(anyList()))
+                .thenReturn(Flux.just(new OrderItem(1L, 1L, 1L, 1)));
 
         StepVerifier.create(orderService.placeOrder())
-                .expectNext(orderResponse)
+                .expectNext(1L)
                 .verifyComplete();
 
         verify(orderRepository, times(1)).save(any(Order.class));
@@ -87,10 +74,27 @@ public class OrderServiceImplTest {
     @Test
     void placeOrder_shouldNotPlaceOrderIfCartIsEmpty() {
         when(cartService.getCartItems())
-                .thenReturn(Flux.empty());
+                .thenReturn(List.of());
 
         StepVerifier.create(orderService.placeOrder())
                 .expectError(NoProductsInOrderException.class)
                 .verify();
+    }
+
+    @Test
+    void findById_shouldFindOrderById() {
+        Order order = new Order(1L, LocalDate.now());
+        OrderItem orderItem = new OrderItem(1L, 1L, 1L, 1);
+        Product product = new Product(1L, "title", "description", "image", 1);
+        when(orderRepository.findById(1L))
+                .thenReturn(Mono.just(order));
+        when(orderItemRepository.findAllByOrderId(1L))
+                .thenReturn(Flux.just(orderItem));
+        when(productRepository.findAllById(List.of(1L)))
+                .thenReturn(Flux.just(product));
+
+        StepVerifier.create(orderService.findById(1L))
+                .expectNextMatches(o -> o.getItems().getFirst().getProduct().getId() == 1L)
+                .verifyComplete();
     }
 }

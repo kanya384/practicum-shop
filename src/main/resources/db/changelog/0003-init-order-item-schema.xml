@@ -25,7 +25,7 @@
             </column>
         </createTable>
         <rollback>
-            <dropTable tableName="order"/>
+            <dropTable tableName="order_item"/>
         </rollback>
     </changeSet>
     <changeSet id="create_order_item_foreign_key_order" author="laurkan">
@@ -36,7 +36,7 @@
         </preConditions>
         <addForeignKeyConstraint baseTableName="order_item"
                                  baseColumnNames="order_id"
-                                 referencedTableName="order"
+                                 referencedTableName="orders"
                                  referencedColumnNames="id"
                                  onDelete="CASCADE"
                                  constraintName="fk_order_item_order"/>

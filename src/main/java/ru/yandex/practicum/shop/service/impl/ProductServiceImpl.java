@@ -31,7 +31,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     @Override
     public Mono<ProductResponseDTO> save(ProductCreateDTO data) {
-        return Mono.just(productMapper.map(data))
+        return Mono.just(productMapper.mapCreate(data))
                 .doOnNext(p -> {
                     String imageFileName = storageUtil.store(data.getFile());
                     p.setImage(imageFileName);
@@ -76,7 +76,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Mono<ProductsPageResponseDTO> findAll(String search, int page, int pageSize, ProductSort sort) {
-        Pageable pageable = PageRequest.of(page, pageSize, toDbSort(sort));
+        Pageable pageable = PageRequest.of(page - 1, pageSize, toDbSort(sort));
         Map<Long, CartItem> productsInCartMap = cartService.getProductsInCartMap();
 
         Flux<Product> products = search != null && !search.isEmpty() ?
