@@ -61,9 +61,11 @@
                             <span th:text="${product.description}"></span>
                         </div>
                         <div class="items-in-cart d-flex justify-content-end">
-                            <form th:if="${product.count == null}" th:action="@{${'/cart/add/' + product.id}}"
+                            <form th:if="${product.count == null || product.count == 0}"
+                                  th:action="@{${'/cart/add/' + product.id}}"
                                   method="post"
                                   class="d-flex justify-content-end"
+                                  onclick="processFormWithPrevent(event)"
                                   style="max-width:250px">
                                 <button type="submit"
                                         class="items-in-cart-add btn btn-outline-primary">
@@ -80,9 +82,11 @@
                                     </svg>
                                 </button>
                             </form>
-                            <div th:unless="${product.count == null}" class="items-in-cart-count btn-group">
+                            <div th:unless="${product.count == null || product.count == 0}"
+                                 class="items-in-cart-count btn-group">
                                 <form th:action="@{${'/cart/dec/' + product.id}}"
                                       method="post"
+                                      onclick="processFormWithPrevent(event)"
                                       class="d-flex justify-content-end"
                                       style="max-width:250px">
                                     <button type="submit" class="btn btn-outline-secondary">-</button>
@@ -90,6 +94,7 @@
                                 <button type="button" class="btn btn-outline-secondary"
                                         th:text="${product.count}"></button>
                                 <form th:action="@{${'/cart/inc/' + product.id}}"
+                                      onclick="processFormWithPrevent(event)"
                                       method="post"
                                       style="max-width:250px">
                                     <button type="submit" class="btn btn-outline-secondary">+</button>
@@ -106,6 +111,20 @@
     function addToCart(e) {
         e.target.closest('.items-in-cart-add').style.display = 'none';
         e.currentTarget.parentNode.querySelector('.items-in-cart-count').style.display = 'flex';
+    }
+
+    const processFormWithPrevent = async (e) => {
+        e.preventDefault();
+        const form = event.currentTarget;
+        console.log(form);
+        let response = await fetch(form.action, {
+            method:  form.method,
+            body:   new FormData(form),
+        })
+
+        if (response.ok) {
+            window.location.reload();
+        }
     }
 </script>
 </body>

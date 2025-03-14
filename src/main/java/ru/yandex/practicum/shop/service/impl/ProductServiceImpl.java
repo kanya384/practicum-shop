@@ -79,6 +79,7 @@ public class ProductServiceImpl implements ProductService {
         Pageable pageable = PageRequest.of(page - 1, pageSize, toDbSort(sort));
         Map<Long, CartItem> productsInCartMap = cartService.getProductsInCartMap();
 
+
         Flux<Product> products = search != null && !search.isEmpty() ?
                 this.productRepository.findAllByTitleOrDescription(search, pageable)
                 : this.productRepository.findAllBy(pageable);
@@ -92,7 +93,7 @@ public class ProductServiceImpl implements ProductService {
                 .map(productMapper::map)
                 .map(p -> {
                     if (productsInCartMap.containsKey(p.getId())) {
-                        p.setCount(p.getCount());
+                        p.setCount(productsInCartMap.get(p.getId()).getCount());
                     }
                     return p;
                 })

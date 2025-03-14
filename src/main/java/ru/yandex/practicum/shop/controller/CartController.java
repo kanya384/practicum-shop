@@ -15,39 +15,40 @@ public class CartController {
     private final CartService cartService;
 
     @GetMapping
-    public String getCartItems(Model model) {
+    public Mono<String> getCartItems(Model model) {
         model.addAttribute("items", cartService.getCartItems());
         model.addAttribute("sum", cartService.getCartItems()
                 .stream().map(ci -> ci.getCount() * ci.getProduct().getPrice())
                 .reduce(0, Integer::sum));
-        return "cart";
+        return Mono.just("cart");
     }
 
     @PostMapping("/add/{productId}")
     public Mono<String> addProductToCart(@RequestHeader(value = HttpHeaders.REFERER) final String referrer,
                                          @PathVariable("productId") Long productId) {
         return cartService.addItemToCart(productId)
-                .flatMap(p -> Mono.just("cart"));
+                .map(p -> "cart");
     }
 
     @PostMapping("/remove/{productId}")
-    public String removeProductFromCart(@RequestHeader(value = HttpHeaders.REFERER) final String referrer,
-                                        @PathVariable("productId") Long productId) {
-        cartService.removeItemFromCart(productId);
-        return "redirect:" + referrer;
+    public Mono<String> removeProductFromCart(@RequestHeader(value = HttpHeaders.REFERER) final String referrer,
+                                              @PathVariable("productId") Long productId) {
+
+        return cartService.removeItemFromCart(productId)
+                .map(p -> "cart");
     }
 
     @PostMapping("/inc/{productId}")
-    public String increaseItemCount(@RequestHeader(value = HttpHeaders.REFERER) final String referrer,
-                                    @PathVariable("productId") Long productId) {
-        cartService.increaseItemCount(productId);
-        return "redirect:" + referrer;
+    public Mono<String> increaseItemCount(@RequestHeader(value = HttpHeaders.REFERER) final String referrer,
+                                          @PathVariable("productId") Long productId) {
+        return cartService.increaseItemCount(productId)
+                .map(p -> "cart");
     }
 
     @PostMapping("/dec/{productId}")
-    public String decreaseItemCount(@RequestHeader(value = HttpHeaders.REFERER) final String referrer,
-                                    @PathVariable("productId") Long productId) {
-        cartService.decreaseItemCount(productId);
-        return "redirect:" + referrer;
+    public Mono<String> decreaseItemCount(@RequestHeader(value = HttpHeaders.REFERER) final String referrer,
+                                          @PathVariable("productId") Long productId) {
+        return cartService.decreaseItemCount(productId)
+                .map(p -> "cart");
     }
 }

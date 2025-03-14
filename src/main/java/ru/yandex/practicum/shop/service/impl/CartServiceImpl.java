@@ -25,8 +25,7 @@ public class CartServiceImpl implements CartService {
     private final CartMapper cartMapper;
     private final ProductRepository productRepository;
 
-    public synchronized Mono<Void> addItemToCart(Long productId) {
-
+    public synchronized Mono<Long> addItemToCart(Long productId) {
         return Mono.just(cart.containsKey(productId))
                 .flatMap(exists -> {
                     if (exists) {
@@ -36,10 +35,10 @@ public class CartServiceImpl implements CartService {
                 })
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("Продукт", productId)))
                 .doOnNext((product) -> cart.put(productId, new CartItem(product, 1)))
-                .then();
+                .map(p -> productId);
     }
 
-    public Mono<Void> removeItemFromCart(Long productId) {
+    public Mono<Long> removeItemFromCart(Long productId) {
         return Mono.just(cart.containsKey(productId))
                 .flatMap(exists -> {
                     if (!exists) {
@@ -49,10 +48,10 @@ public class CartServiceImpl implements CartService {
                     return Mono.just(productId);
                 })
                 .doOnNext((cart::remove))
-                .then();
+                .map(p -> productId);
     }
 
-    public synchronized Mono<Void> increaseItemCount(Long productId) {
+    public synchronized Mono<Long> increaseItemCount(Long productId) {
         return Mono.just(cart.containsKey(productId))
                 .flatMap(exists -> {
                     if (!exists) {
@@ -61,22 +60,27 @@ public class CartServiceImpl implements CartService {
                     return Mono.just(cart.get(productId));
                 })
                 .doOnNext(CartItem::inc)
-                .then();
+                .map(ci -> cart.put(ci.getProduct().getId(), ci))
+                .map(p -> productId);
     }
 
-    public synchronized Mono<Void> decreaseItemCount(Long productId) {
-        return Mono.fromRunnable(() -> {
-            CartItem item = cart.get(productId);
-            if (item == null) {
-                throw new NoItemInCartException(String.format("Продукта c id = %d нет в корзине", productId));
-            }
-
-            item.dec();
-
-            if (item.getCount() == 0) {
-                cart.remove(productId);
-            }
-        });
+    public synchronized Mono<Long> decreaseItemCount(Long productId) {
+        return Mono.just(cart.containsKey(productId))
+                .flatMap(exists -> {
+                    if (!exists) {
+                        return Mono.error(new NoItemInCartException(String.format("Продукта c id = %d нет в корзине", productId)));
+                    }
+                    return Mono.just(cart.get(productId));
+                })
+                .doOnNext(CartItem::dec)
+                .doOnNext(ci -> {
+                    if (ci.getCount() == 0) {
+                        cart.remove(productId);
+                    } else {
+                        cart.put(ci.getProduct().getId(), ci);
+                    }
+                })
+                .map(p -> productId);
     }
 
     @Override

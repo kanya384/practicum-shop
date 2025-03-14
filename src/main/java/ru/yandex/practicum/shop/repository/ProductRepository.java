@@ -12,7 +12,7 @@ import ru.yandex.practicum.shop.model.Product;
 public interface ProductRepository extends R2dbcRepository<Product, Long> {
     Flux<Product> findAllBy(Pageable pageable);
 
-    @Query("SELECT p FROM Product p WHERE lower(p.title) like lower(concat('%', :search, '%')) or lower(p.description) like lower(concat('%', :search, '%'))")
+    @Query("SELECT * FROM Product p WHERE lower(p.title) like lower(concat('%', :search, '%')) or lower(p.description) like lower(concat('%', :search, '%'))")
     Flux<Product> findAllByTitleOrDescription(String search, Pageable pageable);
 
     @Query("SELECT count(*) FROM Product p WHERE lower(p.title) like lower(concat('%', :search, '%')) or lower(p.description) like lower(concat('%', :search, '%'))")

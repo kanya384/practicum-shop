@@ -121,6 +121,7 @@
                         <div class="items-in-cart d-flex justify-content-end">
                             <form th:if="${product.count == null}" th:action="@{${'/cart/add/' + product.id}}"
                                   method="post"
+                                  onsubmit="processFormWithPrevent(event)"
                                   class="d-flex justify-content-end"
                                   style="max-width:250px">
                                 <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.sort)}"/>
@@ -146,6 +147,7 @@
                                 <form th:action="@{${'/cart/dec/' + product.id}}"
                                       method="post"
                                       class="d-flex justify-content-end"
+                                      onclick="processFormWithPrevent(event)"
                                       style="max-width:250px">
                                     <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.sort)}"/>
                                     <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.search)}"/>
@@ -157,6 +159,7 @@
                                         th:text="${product.count}"></button>
                                 <form th:action="@{${'/cart/inc/' + product.id}}"
                                       method="post"
+                                      onclick="processFormWithPrevent(event)"
                                       style="max-width:250px">
                                     <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.sort)}"/>
                                     <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.search)}"/>
@@ -175,6 +178,20 @@
 <script>
     const changePageSize = (e) => {
         e.target.closest('form').submit()
+    }
+
+    const processFormWithPrevent = async (e) => {
+        e.preventDefault();
+        const form = event.currentTarget;
+        console.log(form);
+        let response = await fetch(form.action, {
+            method:  form.method,
+            body:   new FormData(form),
+        })
+
+        if (response.ok) {
+            window.location.reload();
+        }
     }
 </script>
 </body>

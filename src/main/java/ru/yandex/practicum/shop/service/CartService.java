@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Map;
 
 public interface CartService {
-    Mono<Void> addItemToCart(Long productId);
+    Mono<Long> addItemToCart(Long productId);
 
-    Mono<Void> removeItemFromCart(Long productId);
+    Mono<Long> removeItemFromCart(Long productId);
 
-    Mono<Void> increaseItemCount(Long productId);
+    Mono<Long> increaseItemCount(Long productId);
 
-    Mono<Void> decreaseItemCount(Long productId);
+    Mono<Long> decreaseItemCount(Long productId);
 
     Mono<Void> clearCart();
 

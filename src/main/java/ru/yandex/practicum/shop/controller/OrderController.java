@@ -23,9 +23,9 @@ public class OrderController {
     }
 
     @GetMapping
-    public String findAll(Model model) {
+    public Mono<String> findAll(Model model) {
         model.addAttribute("orders", orderService.findAll());
-        return "orders";
+        return Mono.just("orders");
     }
 
     @GetMapping("/{id}")

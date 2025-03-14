@@ -3,6 +3,7 @@ package ru.yandex.practicum.shop.model;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 
+
 @Getter
 @Setter
 @AllArgsConstructor
