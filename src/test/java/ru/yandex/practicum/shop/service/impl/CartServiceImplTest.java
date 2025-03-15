@@ -49,6 +49,7 @@ public class CartServiceImplTest {
                 .thenReturn(Mono.just(new Product(2L, "title", "description", "image", 100)));
 
         StepVerifier.create(cartService.addItemToCart(2L))
+                .expectNextMatches(id -> id == 2L)
                 .verifyComplete();
 
         assertEquals(2, cart.size());
@@ -74,6 +75,7 @@ public class CartServiceImplTest {
     @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
     void removeItemFromCart_shouldRemoveItem() {
         StepVerifier.create(cartService.removeItemFromCart(1L))
+                .expectNextMatches(id -> id == 1L)
                 .verifyComplete();
 
         assertEquals(0, cart.size());
@@ -91,6 +93,7 @@ public class CartServiceImplTest {
         assertEquals(1, cart.get(1L).getCount());
 
         StepVerifier.create(cartService.increaseItemCount(1L))
+                .expectNextMatches(id -> id == 1L)
                 .verifyComplete();
 
         assertEquals(2, cart.get(1L).getCount());
@@ -112,6 +115,7 @@ public class CartServiceImplTest {
 
         StepVerifier
                 .create(cartService.decreaseItemCount(1L))
+                .expectNextMatches(id -> id == 1L)
                 .verifyComplete();
 
         assertEquals(1, cart.get(1L).getCount());
@@ -121,6 +125,7 @@ public class CartServiceImplTest {
     void decreaseItemCount_shouldRemoveOnDecreaseIfZeroCount() {
 
         StepVerifier.create(cartService.decreaseItemCount(1L))
+                .expectNextMatches(id -> id == 1L)
                 .verifyComplete();
 
         assertEquals(0, cart.size());

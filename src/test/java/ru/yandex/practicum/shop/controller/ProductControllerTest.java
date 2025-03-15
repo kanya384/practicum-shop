@@ -1,56 +1,88 @@
 package ru.yandex.practicum.shop.controller;
 
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
+import ru.yandex.practicum.shop.dto.product.ProductResponseDTO;
+import ru.yandex.practicum.shop.dto.product.ProductSort;
+import ru.yandex.practicum.shop.dto.product.ProductsPageResponseDTO;
+import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
+import ru.yandex.practicum.shop.service.ProductService;
 
-@WebMvcTest(ProductController.class)
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+@WebFluxTest(ProductController.class)
 public class ProductControllerTest {
-    /*@Autowired
-    MockMvc mockMvc;
+    @Autowired
+    private WebTestClient webTestClient;
 
     @MockitoBean
-    ProductService productService;
+    private ProductService productService;
 
     @Test
     void productsList_shouldReturnProductsList() throws Exception {
-        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-        productResponseDTO.setId(1L);
-        productResponseDTO.setTitle("title");
-        productResponseDTO.setDescription("description");
-        productResponseDTO.setImage("image");
-        productResponseDTO.setPrice(100);
+        ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
+                .id(1L)
+                .title("title")
+                .description("description")
+                .image("image")
+                .price(100)
+                .build();
 
-        ProductsPageResponseDTO productsPageResponseDTO = new ProductsPageResponseDTO();
-        productsPageResponseDTO.setPage(1);
-        productsPageResponseDTO.setPageSize(10);
-        productsPageResponseDTO.setTotalCount(100);
-        productsPageResponseDTO.setList(List.of(productResponseDTO));
+        ProductsPageResponseDTO productsPageResponseDTO = ProductsPageResponseDTO
+                .builder()
+                .page(1)
+                .pageSize(10)
+                .totalCount(100)
+                .list(List.of(productResponseDTO))
+                .build();
+
 
         when(productService.findAll(null, 1, 10, ProductSort.EMPTY))
-                .thenReturn(productsPageResponseDTO);
+                .thenReturn(Mono.just(productsPageResponseDTO));
 
-        mockMvc.perform(get("/products"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("text/html;charset=UTF-8"))
-                .andExpect(view().name("products"))
-                .andExpect(xpath("//div[contains(@class, \"product\")]").nodeCount(1));
+        webTestClient.get()
+                .uri("/products")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("<div class=\"product"));
+                });
     }
+
 
     @Test
     void findById_shouldReturnProductById() throws Exception {
-        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-        productResponseDTO.setId(1L);
-        productResponseDTO.setTitle("title");
-        productResponseDTO.setDescription("description");
-        productResponseDTO.setImage("image");
-        productResponseDTO.setPrice(100);
+        ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
+                .id(1L)
+                .title("title")
+                .description("description")
+                .image("image")
+                .price(100)
+                .build();
 
         when(productService.findById(1L))
-                .thenReturn(productResponseDTO);
+                .thenReturn(Mono.just(productResponseDTO));
 
-        mockMvc.perform(get("/products/{id}", 1L))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("text/html;charset=UTF-8"))
-                .andExpect(view().name("product"));
+        webTestClient.get()
+                .uri("/products/{id}", 1L)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("<div class=\"product"));
+                });
     }
 
     @Test
@@ -58,8 +90,14 @@ public class ProductControllerTest {
         when(productService.findById(any()))
                 .thenThrow(new ResourceNotFoundException("Продукт", -1L));
 
-        mockMvc.perform(get("/products/{id}", -1))
-                .andExpect(status().isNotFound())
-                .andExpect(content().contentType("text/html;charset=UTF-8"));
-    }*/
+        webTestClient.get()
+                .uri("/products/{id}", -1)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("<h1>Упс, что-то пошло не так!</h1>"));
+                });
+    }
 }

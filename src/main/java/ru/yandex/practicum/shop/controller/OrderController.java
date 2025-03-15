@@ -19,7 +19,8 @@ public class OrderController {
     @PostMapping
     public Mono<String> placeOrder(Model model) {
         return orderService.placeOrder()
-                .flatMap(o -> Mono.just("orders"));
+                .map(m -> model.addAttribute("order", m))
+                .flatMap(o -> Mono.just("order"));
     }
 
     @GetMapping

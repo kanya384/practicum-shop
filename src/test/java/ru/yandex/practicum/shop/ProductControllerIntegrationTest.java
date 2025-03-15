@@ -2,42 +2,59 @@ package ru.yandex.practicum.shop;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import ru.yandex.practicum.shop.service.ProductService;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureMockMvc
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureWebTestClient
 public class ProductControllerIntegrationTest {
     @Autowired
-    MockMvc mockMvc;
+    private WebTestClient webTestClient;
+
+    @Autowired
+    private ProductService productService;
 
     @Test
     void productsList_shouldReturnProductsList() throws Exception {
-        mockMvc.perform(get("/products"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("text/html;charset=UTF-8"))
-                .andExpect(view().name("products"))
-                .andExpect(xpath("//div[contains(@class, \"product\")]").nodeCount(10));
+        webTestClient.get()
+                .uri("/products")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("<div class=\"product"));
+                });
     }
 
     @Test
     void findById_shouldReturnProductById() throws Exception {
-        mockMvc.perform(get("/products/{id}", 1L))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("text/html;charset=UTF-8"))
-                .andExpect(view().name("product"));
+        webTestClient.get()
+                .uri("/products/{id}", 1L)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("<div class=\"product"));
+                });
     }
 
     @Test
     void findById_shouldReturn404Page() throws Exception {
-        mockMvc.perform(get("/products/{id}", -1))
-                .andExpect(status().isNotFound())
-                .andExpect(content().contentType("text/html;charset=UTF-8"));
+        webTestClient.get()
+                .uri("/products/{id}", -1)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("<h1>Упс, что-то пошло не так!</h1>"));
+                });
     }
 }

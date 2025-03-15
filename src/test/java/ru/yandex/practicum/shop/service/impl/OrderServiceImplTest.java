@@ -52,19 +52,31 @@ public class OrderServiceImplTest {
 
     @Test
     void placeOrder_shouldPlaceOrder() {
-        var product = new Product(1L, "title", "description", "image", 1);
-        when(cartService.getCartItems())
-                .thenReturn(List.of(new CartItem(product, 1)));
-
+        Product product = new Product(1L, "title", "description", "image", 1);
         when(orderRepository.save(any(Order.class)))
                 .thenReturn(Mono.just(new Order(1L, LocalDate.now())));
 
+        when(cartService.getCartItems())
+                .thenReturn(List.of(new CartItem(product, 1)));
 
         when(orderItemRepository.saveAll(anyList()))
                 .thenReturn(Flux.just(new OrderItem(1L, 1L, 1L, 1)));
 
+        Order order = new Order(1L, LocalDate.now());
+        OrderItem orderItem = new OrderItem(1L, 1L, 1L, 1);
+
+        when(cartService.clearCart())
+                .thenReturn(Mono.empty());
+        when(orderRepository.findById(1L))
+                .thenReturn(Mono.just(order));
+        when(orderItemRepository.findAllByOrderId(1L))
+                .thenReturn(Flux.just(orderItem));
+        when(productRepository.findAllById(List.of(1L)))
+                .thenReturn(Flux.just(product));
+
+
         StepVerifier.create(orderService.placeOrder())
-                .expectNext(1L)
+                .expectNextMatches(o -> o.getId() == 1L)
                 .verifyComplete();
 
         verify(orderRepository, times(1)).save(any(Order.class));
@@ -73,6 +85,9 @@ public class OrderServiceImplTest {
 
     @Test
     void placeOrder_shouldNotPlaceOrderIfCartIsEmpty() {
+        when(orderRepository.save(any(Order.class)))
+                .thenReturn(Mono.just(new Order(1L, LocalDate.now())));
+
         when(cartService.getCartItems())
                 .thenReturn(List.of());
 

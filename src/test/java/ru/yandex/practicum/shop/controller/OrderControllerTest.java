@@ -1,112 +1,183 @@
 package ru.yandex.practicum.shop.controller;
 
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import ru.yandex.practicum.shop.dto.order.OrderItemResponseDTO;
+import ru.yandex.practicum.shop.dto.order.OrderResponseDTO;
+import ru.yandex.practicum.shop.dto.product.ProductResponseDTO;
+import ru.yandex.practicum.shop.exception.NoProductsInOrderException;
+import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
+import ru.yandex.practicum.shop.service.OrderService;
 
-@WebMvcTest(OrderController.class)
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
+
+@WebFluxTest(OrderController.class)
 public class OrderControllerTest {
-    /*@Autowired
-    MockMvc mockMvc;
+    @Autowired
+    private WebTestClient webTestClient;
 
     @MockitoBean
     OrderService orderService;
 
 
     @Test
-    void placeOrder_shouldPlaceOrder() throws Exception {
-        when(orderService.placeOrder())
-                .thenReturn(new OrderResponseDTO());
+    void placeOrder_shouldPlaceOrder() {
+        ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
+                .id(1L)
+                .title("title")
+                .description("description")
+                .image("image")
+                .price(100)
+                .count(0)
+                .build();
 
-        mockMvc.perform(post("/orders")
-                        .header("referer", "/orders"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(view().name(containsString("redirect:orders/")));
+        OrderItemResponseDTO orderItemResponseDTO = OrderItemResponseDTO.builder()
+                .id(1L)
+                .product(productResponseDTO)
+                .count(1)
+                .build();
+
+        OrderResponseDTO orderResponseDTO = OrderResponseDTO.builder()
+                .id(1L)
+                .items(List.of(orderItemResponseDTO))
+                .createdAt(LocalDate.now())
+                .build();
+
+        when(orderService.placeOrder())
+                .thenReturn(Mono.just(orderResponseDTO));
+
+        webTestClient.post()
+                .uri("/orders")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_HTML)
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains(" <div class=\"order_item"));
+                });
 
         verify(orderService, times(1)).placeOrder();
     }
 
     @Test
-    void placeOrder_shouldReturnErrorIfNoItemsInOrder() throws Exception {
+    void placeOrder_shouldReturnErrorIfNoItemsInOrder() {
         when(orderService.placeOrder())
                 .thenThrow(new NoProductsInOrderException(""));
 
-        mockMvc.perform(post("/orders"))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType("text/html;charset=UTF-8"))
-                .andExpect(view().name("oops"));
+        webTestClient.post()
+                .uri("/orders")
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("<h1>Упс, что-то пошло не так!</h1>"));
+                });
     }
 
     @Test
-    void findAll_shouldReturnOrdersList() throws Exception {
-        OrderResponseDTO orderResponseDTO = new OrderResponseDTO();
-        orderResponseDTO.setId(1L);
-        orderResponseDTO.setItems(List.of(new OrderItemResponseDTO()));
-        orderResponseDTO.setCreatedAt(LocalDate.now());
+    void findAll_shouldReturnOrdersList() {
+        ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
+                .id(1L)
+                .title("title")
+                .description("description")
+                .image("image")
+                .price(100)
+                .count(0)
+                .build();
 
-        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-        productResponseDTO.setId(1L);
-        productResponseDTO.setTitle("title");
-        productResponseDTO.setDescription("description");
-        productResponseDTO.setImage("image");
-        productResponseDTO.setPrice(100);
-        productResponseDTO.setCount(0);
+        OrderItemResponseDTO orderItemResponseDTO = OrderItemResponseDTO.builder()
+                .id(1L)
+                .product(productResponseDTO)
+                .count(1)
+                .build();
 
-        OrderItemResponseDTO orderItemResponseDTO = new OrderItemResponseDTO();
-        orderItemResponseDTO.setId(1L);
-        orderItemResponseDTO.setProduct(productResponseDTO);
-        orderItemResponseDTO.setCount(1);
-
-        orderResponseDTO.setItems(List.of(orderItemResponseDTO));
-
+        OrderResponseDTO orderResponseDTO = OrderResponseDTO.builder()
+                .id(1L)
+                .items(List.of(orderItemResponseDTO))
+                .createdAt(LocalDate.now())
+                .build();
 
         when(orderService.findAll())
-                .thenReturn(List.of(orderResponseDTO));
+                .thenReturn(Flux.just(orderResponseDTO));
 
-        mockMvc.perform(get("/orders"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("orders"))
-                .andExpect(xpath("//div[contains(@class, \"order-item\")]").nodeCount(1));
+        webTestClient.get()
+                .uri("/orders")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("<div class=\"order-item"));
+                });
     }
 
+
     @Test
-    void findById_shouldReturnOrderById() throws Exception {
+    void findById_shouldReturnOrderById() {
+        ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
+                .id(1L)
+                .title("title")
+                .description("description")
+                .image("image")
+                .price(100)
+                .count(0)
+                .build();
 
-        OrderResponseDTO orderResponseDTO = new OrderResponseDTO();
-        orderResponseDTO.setId(1L);
-        orderResponseDTO.setItems(List.of(new OrderItemResponseDTO()));
-        orderResponseDTO.setCreatedAt(LocalDate.now());
+        OrderItemResponseDTO orderItemResponseDTO = OrderItemResponseDTO.builder()
+                .id(1L)
+                .product(productResponseDTO)
+                .count(1)
+                .build();
 
-        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-        productResponseDTO.setId(1L);
-        productResponseDTO.setTitle("title");
-        productResponseDTO.setDescription("description");
-        productResponseDTO.setImage("image");
-        productResponseDTO.setPrice(100);
-        productResponseDTO.setCount(0);
-
-        OrderItemResponseDTO orderItemResponseDTO = new OrderItemResponseDTO();
-        orderItemResponseDTO.setId(1L);
-        orderItemResponseDTO.setProduct(productResponseDTO);
-        orderItemResponseDTO.setCount(1);
-
-        orderResponseDTO.setItems(List.of(orderItemResponseDTO));
+        OrderResponseDTO orderResponseDTO = OrderResponseDTO.builder()
+                .id(1L)
+                .items(List.of(orderItemResponseDTO))
+                .createdAt(LocalDate.now())
+                .build();
 
         when(orderService.findById(anyLong()))
-                .thenReturn(orderResponseDTO);
+                .thenReturn(Mono.just(orderResponseDTO));
 
-        mockMvc.perform(get("/orders/{id}", 1))
-                .andExpect(status().isOk())
-                .andExpect(view().name("order"));
+        webTestClient.get()
+                .uri("/orders/{id}", 1)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_HTML)
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("<div class=\"order_item"));
+                });
     }
 
     @Test
-    void findById_shouldReturn404IfOrderNotExists() throws Exception {
+    void findById_shouldReturn404IfOrderNotExists() {
         when(orderService.findById(anyLong()))
                 .thenThrow(new ResourceNotFoundException("Заказ", -1L));
 
-        mockMvc.perform(get("/orders/{id}", -1))
-                .andExpect(status().isNotFound())
-                .andExpect(view().name("oops"));
-    }*/
+        webTestClient.get()
+                .uri("/orders/{id}", -1)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("<h1>Упс, что-то пошло не так!</h1>"));
+                });
+    }
 
 
 }

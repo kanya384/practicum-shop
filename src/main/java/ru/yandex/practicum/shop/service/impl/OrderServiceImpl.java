@@ -9,6 +9,7 @@ import ru.yandex.practicum.shop.dto.order.OrderItemResponseDTO;
 import ru.yandex.practicum.shop.dto.order.OrderResponseDTO;
 import ru.yandex.practicum.shop.dto.product.ProductResponseDTO;
 import ru.yandex.practicum.shop.exception.NoProductsInOrderException;
+import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
 import ru.yandex.practicum.shop.mapper.OrderMapper;
 import ru.yandex.practicum.shop.mapper.ProductMapper;
 import ru.yandex.practicum.shop.model.Order;
@@ -36,7 +37,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     @Override
-    public Mono<Long> placeOrder() {
+    public Mono<OrderResponseDTO> placeOrder() {
+        if (cartService.getCartItems().isEmpty()) {
+            return Mono.error(new NoProductsInOrderException("ошибка сохранения заказа"));
+        }
+
         return orderRepository.save(new Order())
                 .switchIfEmpty(Mono.error(new InternalError("ошибка сохранения заказа")))
                 .map(order -> cartService.getCartItems()
@@ -50,14 +55,17 @@ public class OrderServiceImpl implements OrderService {
                         }).toList()
                 )
                 .map(orderItemRepository::saveAll)
-                .switchIfEmpty(Mono.error(new NoProductsInOrderException("в заказе должен быть хотя бы один продукт")))
+                .switchIfEmpty(Mono.error(new InternalError("ошибка сохранения заказа")))
+                .doOnNext(c -> cartService.clearCart()
+                        .block())
                 .flatMap(Flux::collectList)
-                .map(oi -> oi.getFirst().getOrderId());
+                .flatMap(l -> findById(l.getFirst().getOrderId()));
     }
 
     @Override
     public Mono<OrderResponseDTO> findById(Long id) {
         return orderRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Заказ", id)))
                 .zipWith(findOrderItemsByOrderId(id))
                 .map(tuple ->
                         OrderResponseDTO.builder()
@@ -74,7 +82,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Flux<OrderResponseDTO> findAll() {
         return orderRepository.findAll()
-                .map(orderMapper::map);
+                .map(o -> OrderResponseDTO.builder()
+                        .id(o.getId())
+                        .createdAt(o.getCreatedAt())
+                        .build());
     }
 
     private Mono<List<OrderItemResponseDTO>> findOrderItemsByOrderId(Long orderId) {

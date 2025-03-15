@@ -1,116 +1,192 @@
 package ru.yandex.practicum.shop.controller;
 
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import ru.yandex.practicum.shop.dto.cart.CartItemResponseDTO;
+import ru.yandex.practicum.shop.dto.product.ProductResponseDTO;
+import ru.yandex.practicum.shop.exception.AlreadyExistsInCartException;
+import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
+import ru.yandex.practicum.shop.service.CartService;
 
-@WebMvcTest(CartController.class)
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
+
+@WebFluxTest(CartController.class)
 public class CartControllerTest {
-    /*@Autowired
-    MockMvc mockMvc;
+    @Autowired
+    private WebTestClient webTestClient;
 
     @MockitoBean
     CartService cartService;
 
     @Test
-    void getCartItems_shouldReturnProductsList() throws Exception {
-        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-        productResponseDTO.setId(1L);
-        productResponseDTO.setTitle("title");
-        productResponseDTO.setDescription("description");
-        productResponseDTO.setImage("image");
-        productResponseDTO.setPrice(100);
-        productResponseDTO.setCount(0);
+    void getCartItems_shouldReturnProductsList() {
+        ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
+                .id(1L)
+                .title("title")
+                .description("description")
+                .image("image")
+                .price(100)
+                .count(0)
+                .build();
 
         when(cartService.returnCartItems())
-                .thenReturn(List.of(new CartItemResponseDTO(productResponseDTO, 1)));
+                .thenReturn(Flux.just(new CartItemResponseDTO(productResponseDTO, 1)));
+        when(cartService.returnCartItems())
+                .thenReturn(Flux.just(new CartItemResponseDTO(productResponseDTO, 1)));
 
-        mockMvc.perform(get("/cart"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("text/html;charset=UTF-8"))
-                .andExpect(view().name("cart"))
-                .andExpect(xpath("//div[contains(@class, \"cart-item\")]").nodeCount(1));
+        webTestClient.get()
+                .uri("/cart")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_HTML)
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("class=\"cart-item card"));
+                });
+
+        verify(cartService, times(2)).returnCartItems();
     }
 
     @Test
-    void addProductToCart_shouldAddProductToCart() throws Exception {
-        mockMvc.perform(post("/cart/add/{id}", 3L)
-                        .header("referer", "/cart"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(view().name("redirect:/cart"));
+    void addProductToCart_shouldAddProductToCart() {
+        when(cartService.addItemToCart(anyLong()))
+                .thenReturn(Mono.just(3L));
+
+        webTestClient.post()
+                .uri("/cart/add/{id}", 3L)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_HTML);
+
 
         verify(cartService, times(1))
-                .addItemToCart(any());
+                .addItemToCart(anyLong());
     }
 
-    @Test
-    void addProductToCart_shouldReturnErrorIfProductAlreadyExistingInCart() throws Exception {
-        doThrow(new AlreadyExistsInCartException("")).when(cartService).addItemToCart(anyLong());
-
-        mockMvc.perform(post("/cart/add/{id}", 2L)
-                        .header("referer", "/cart"))
-                .andExpect(status().isBadRequest())
-                .andExpect(view().name("oops"));
-    }
 
     @Test
-    void removeProductFromCart_shouldRemoveProductFromCart() throws Exception {
-        mockMvc.perform(post("/cart/remove/{id}", 2L)
-                        .header("referer", "/cart"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(view().name("redirect:/cart"));
+    void addProductToCart_shouldReturnErrorIfProductAlreadyExistingInCart() {
+        doThrow(new AlreadyExistsInCartException(""))
+                .when(cartService)
+                .addItemToCart(anyLong());
+
+        webTestClient.post()
+                .uri("/cart/add/{id}", 3L)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("<h1>Упс, что-то пошло не так!</h1>"));
+                });
+
 
         verify(cartService, times(1))
-                .removeItemFromCart(any());
+                .addItemToCart(anyLong());
     }
 
     @Test
-    void removeProductFromCart_shouldReturnErrorIfProductNotExistingInCart() throws Exception {
+    void removeProductFromCart_shouldRemoveProductFromCart() {
+        when(cartService.removeItemFromCart(anyLong()))
+                .thenReturn(Mono.just(3L));
+
+        webTestClient.post()
+                .uri("/cart/remove/{id}", 3L)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_HTML);
+
+
+        verify(cartService, times(1))
+                .removeItemFromCart(anyLong());
+    }
+
+    @Test
+    void removeProductFromCart_shouldReturnErrorIfProductNotExistingInCart() {
         doThrow(new ResourceNotFoundException("Продутк", 3L)).when(cartService).removeItemFromCart(anyLong());
 
-        mockMvc.perform(post("/cart/remove/{id}", 3L)
-                        .header("referer", "/cart"))
-                .andExpect(status().isNotFound())
-                .andExpect(view().name("oops"));
+        webTestClient.post()
+                .uri("/cart/remove/{id}", 3L)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.TEXT_HTML)
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("<h1>Упс, что-то пошло не так!</h1>"));
+                });
     }
 
     @Test
-    void increaseItemCount_shouldIncreaseItemCount() throws Exception {
-        mockMvc.perform(post("/cart/inc/{id}", 1L)
-                        .header("referer", "/cart"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(view().name("redirect:/cart"));
+    void increaseItemCount_shouldIncreaseItemCount() {
+        when(cartService.increaseItemCount(anyLong()))
+                .thenReturn(Mono.just(3L));
+
+        webTestClient.post()
+                .uri("/cart/inc/{id}", 3L)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_HTML);
 
         verify(cartService, times(1))
                 .increaseItemCount(any());
     }
 
     @Test
-    void increaseItemCount_shouldReturnNotFoundIfNoItemInCart() throws Exception {
-        doThrow(new ResourceNotFoundException("Продутк", 3L)).when(cartService).increaseItemCount(anyLong());
+    void increaseItemCount_shouldReturnNotFoundIfNoItemInCart() {
+        doThrow(new ResourceNotFoundException("Продутк", 3L))
+                .when(cartService)
+                .increaseItemCount(anyLong());
 
-        mockMvc.perform(post("/cart/inc/{id}", 3L)
-                        .header("referer", "/cart"))
-                .andExpect(status().isNotFound())
-                .andExpect(view().name("oops"));
+        webTestClient.post()
+                .uri("/cart/inc/{id}", 3L)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("<h1>Упс, что-то пошло не так!</h1>"));
+                });
     }
 
     @Test
-    void decreaseItemCount_shouldIncreaseItemCount() throws Exception {
-        mockMvc.perform(post("/cart/dec/{id}", 1L)
-                        .header("referer", "/cart"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(view().name("redirect:/cart"));
+    void decreaseItemCount_shouldIncreaseItemCount() {
+        when(cartService.decreaseItemCount(anyLong()))
+                .thenReturn(Mono.just(3L));
+
+        webTestClient.post()
+                .uri("/cart/dec/{id}", 3L)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_HTML);
 
         verify(cartService, times(1))
                 .decreaseItemCount(any());
     }
 
     @Test
-    void decreaseItemCount_shouldReturnNotFoundIfNoItemInCart() throws Exception {
-        doThrow(new ResourceNotFoundException("Продутк", 3L)).when(cartService).decreaseItemCount(anyLong());
+    void decreaseItemCount_shouldReturnNotFoundIfNoItemInCart() {
+        doThrow(new ResourceNotFoundException("Продутк", 3L))
+                .when(cartService)
+                .decreaseItemCount(anyLong());
 
-        mockMvc.perform(post("/cart/dec/{id}", 3L)
-                        .header("referer", "/cart"))
-                .andExpect(status().isNotFound())
-                .andExpect(view().name("oops"));
-    }*/
+        webTestClient.post()
+                .uri("/cart/dec/{id}", 3L)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("<h1>Упс, что-то пошло не так!</h1>"));
+                });
+    }
 }
