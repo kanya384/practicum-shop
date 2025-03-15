@@ -1,9 +1,15 @@
 # Витрина интернет-магазина
 
-Веб-приложение «Витрина интернет-магазина», написанное с использованием Spring Data и Spring Web:
-Servlet Stack .
+Веб-приложение «Витрина интернет-магазина», написанное с использованием Spring Boot на реактивном стеке технологий.
 
 ## Использование
+
+На устройстве должен быть установлен и запущен Docker. Для запуска базы данных в docker-контейнере нужно выполнить
+команду:
+
+```sh
+docker pull postgres:17.4 && docker run -d --name pg_shop -p 5432:5432 -e POSTGRES_USER=sa -e POSTGRES_PASSWORD=password -e POSTGRES_DB=shop postgres:17.4
+```
 
 Для запуска тестов использовать команду:
 
@@ -21,12 +27,6 @@ Servlet Stack .
 
 ```sh
 ./build/libs/shop-0.0.1-SNAPSHOT.jar
-```
-
-Для сборки docker контейнера и запуска его на порту 8080 выполнить:
-
-```sh
-docker build -t shop:v1 . && docker run -p 8080:8080 shop:v1
 ```
 
 Приложение будет доступно по адресу:
