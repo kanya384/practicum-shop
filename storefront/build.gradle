@@ -1,3 +1,27 @@
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
+tasks.register('buildClient', GenerateTask) {
+    generatorName.set("java")
+    inputSpec.set("$projectDir/../payments/src/main/resources/api-spec.yaml")
+    outputDir.set("$projectDir/build/generated")
+    ignoreFileOverride.set("$projectDir/../payments/.openapi-generator-java-sources.ignore")
+    modelPackage.set("ru.ya.client.domain")
+    invokerPackage.set("ru.ya.client")
+    apiPackage.set("ru.ya.client.api")
+    configOptions.set([
+            hideGenerationTimestamp: "true",
+            library                : "webclient",
+            useJakartaEe           : "true",
+            useTags                : "true",
+            openApiNullable        : "false",
+            serializableModel      : "true"
+    ])
+}
+
 dependencies {
     implementation 'commons-io:commons-io:2.9.0'
+}
+
+tasks.named('compileJava') {
+    dependsOn(tasks.buildClient)
 }

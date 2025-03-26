@@ -1,0 +1,72 @@
+openapi: 3.0.4
+info:
+  title: Payment Service API
+  description: API сервиса платежей
+  version: 1.0.0
+paths:
+  /payments/balance:
+    get:
+      summary: Получить баланс на счете
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+        '500':
+          description: Внутреняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /payments/process:
+    post:
+      summary: Оплатить заказ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessPaymentRequest'
+      responses:
+        '200':
+          description: Платеж успешно проведен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+        '402':
+          description: Недостаточно средств на счете для совершения платежа
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутреняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    BalanceResponse:
+      description: остаток на счете
+      type: object
+      properties:
+        money:
+          type: integer
+          example: 100
+    ProcessPaymentRequest:
+      type: object
+      properties:
+        order_sum:
+          type: integer
+          example: 100
+    ErrorResponse:
+      description: описание ошибки
+      type: object
+      properties:
+        message:
+          type: string
+          example: Внутреняя ошибка сервера
