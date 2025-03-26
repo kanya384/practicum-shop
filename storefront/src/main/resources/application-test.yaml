@@ -13,4 +13,4 @@ spring:
     user: sa
     password: password
     change-log: classpath:/db/changelog/db.changelog-master.xml
-storage-path: ./temp
+storage-path: ./storage

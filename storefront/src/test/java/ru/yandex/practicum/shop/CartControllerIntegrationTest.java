@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
-public class CartControllerIntegrationTest extends AbstractTestContainer {
+public class CartControllerIntegrationTest {
     @Autowired
     private WebTestClient webTestClient;
 
