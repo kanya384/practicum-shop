@@ -20,6 +20,8 @@ tasks.register('buildClient', GenerateTask) {
 
 dependencies {
     implementation 'commons-io:commons-io:2.9.0'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.thymeleaf:thymeleaf-spring6:3.1.2.RELEASE'
 }
 
 tasks.named('compileJava') {

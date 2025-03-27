@@ -1,0 +1,15 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create-root-billing-account" author="laurkan">
+        <insert tableName="billing_account">
+            <column name="id" value="1"/>
+            <column name="money" value="1500"/>
+            <column name="created_at" value="2025-03-26"/>
+            <column name="modified_at" value="2025-03-26"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

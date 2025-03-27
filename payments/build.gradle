@@ -5,13 +5,13 @@ tasks.register('openApiGenerate', GenerateTask) {
     inputSpec.set("$projectDir/src/main/resources/api-spec.yaml")
     outputDir.set("$projectDir/build/generated")
     ignoreFileOverride.set(".openapi-generator-java-sources.ignore")
-    modelPackage.set("ru.ya.practicum.domain")
-    invokerPackage.set("ru.ya.server")
-    apiPackage.set("ru.ya.server.api")
+    modelPackage.set("ru.yandex.practicum.payments.dto")
+    invokerPackage.set("ru.yandex.practicum.payments")
+    apiPackage.set("ru.yandex.practicum.payments.api")
     configOptions.set([
             hideGenerationTimestamp: "true",
             requestMappingMode     : "controller",
-            interfaceOnly          : "false",
+            interfaceOnly          : "true",
             library                : "spring-boot",
             reactive               : "true",
             useSpringBoot3         : "true",
@@ -20,7 +20,8 @@ tasks.register('openApiGenerate', GenerateTask) {
             dateLibrary            : "java8",
             openApiNullable        : "false",
             serializableModel      : "true",
-            returnSuccessCode      : "true"
+            returnSuccessCode      : "true",
+            useResponseEntity      : "false"
     ])
 }
 

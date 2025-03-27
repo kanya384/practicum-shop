@@ -6,6 +6,8 @@ info:
 paths:
   /payments/balance:
     get:
+      tags:
+        - payments
       summary: Получить баланс на счете
       responses:
         '200':
@@ -22,6 +24,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
   /payments/process:
     post:
+      tags:
+        - payments
       summary: Оплатить заказ
       requestBody:
         required: true
@@ -48,6 +52,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /payments/deposit:
+    post:
+      tags:
+        - payments
+      summary: Положить деньги на счет
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepositMoneyRequest'
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+        '500':
+          description: Внутреняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+tags:
+  - name: payments
+    description: Платежные операции
 components:
   schemas:
     BalanceResponse:
@@ -59,8 +90,18 @@ components:
           example: 100
     ProcessPaymentRequest:
       type: object
+      required:
+        - order_sum
       properties:
         order_sum:
+          type: integer
+          example: 100
+    DepositMoneyRequest:
+      type: object
+      required:
+        - money
+      properties:
+        money:
           type: integer
           example: 100
     ErrorResponse:

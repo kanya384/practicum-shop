@@ -1,0 +1,27 @@
+version: '3'
+networks:
+  app-net:
+    driver: bridge
+services:
+  pg_shop:
+    image: 'postgres:17'
+    container_name: 'pg_shop'
+    environment:
+      POSTGRES_USER: sa
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: shop
+    networks:
+      - app-net
+    ports:
+      - 5432:5432
+  pg_payments:
+    image: 'postgres:17'
+    container_name: 'pg_payments'
+    environment:
+      POSTGRES_USER: sa
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: payments
+    networks:
+      - app-net
+    ports:
+      - 5433:5432
