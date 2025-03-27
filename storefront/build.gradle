@@ -5,9 +5,9 @@ tasks.register('buildClient', GenerateTask) {
     inputSpec.set("$projectDir/../payments/src/main/resources/api-spec.yaml")
     outputDir.set("$projectDir/build/generated")
     ignoreFileOverride.set("$projectDir/../payments/.openapi-generator-java-sources.ignore")
-    modelPackage.set("ru.ya.client.domain")
-    invokerPackage.set("ru.ya.client")
-    apiPackage.set("ru.ya.client.api")
+    modelPackage.set("ru.yandex.practicum.shop.domain")
+    invokerPackage.set("ru.yandex.practicum")
+    apiPackage.set("ru.yandex.practicum.shop.api")
     configOptions.set([
             hideGenerationTimestamp: "true",
             library                : "webclient",
@@ -17,6 +17,8 @@ tasks.register('buildClient', GenerateTask) {
             serializableModel      : "true"
     ])
 }
+
+sourceSets.main.java.srcDir "$projectDir/build/generated/src/main/java"
 
 dependencies {
     implementation 'commons-io:commons-io:2.9.0'

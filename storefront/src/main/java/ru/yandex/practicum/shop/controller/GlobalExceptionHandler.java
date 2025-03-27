@@ -6,15 +6,22 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import reactor.core.publisher.Mono;
-import ru.yandex.practicum.shop.exception.AlreadyExistsInCartException;
-import ru.yandex.practicum.shop.exception.NoItemInCartException;
-import ru.yandex.practicum.shop.exception.NoProductsInOrderException;
-import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
+import ru.yandex.practicum.shop.exception.*;
 
 import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler({NotEnoughMoneyException.class})
+    @ResponseStatus(HttpStatus.PAYMENT_REQUIRED)
+    public Mono<String> handleBNotEnoughMoneyException(Exception e, Model model) {
+        model.addAttribute("error", Map.of(
+                "code", HttpStatus.PAYMENT_REQUIRED,
+                "text", e.getMessage()
+        ));
+        return Mono.just("oops");
+    }
 
     @ExceptionHandler({AlreadyExistsInCartException.class, NoProductsInOrderException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)

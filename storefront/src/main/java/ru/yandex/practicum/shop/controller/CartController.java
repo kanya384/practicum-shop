@@ -9,12 +9,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.shop.service.CartService;
+import ru.yandex.practicum.shop.service.PaymentsService;
 
 @Controller
 @RequestMapping("/cart")
 @RequiredArgsConstructor
 public class CartController {
     private final CartService cartService;
+    private final PaymentsService paymentsService;
 
     @GetMapping
     public Mono<String> getCartItems(Model model) {
@@ -22,6 +24,7 @@ public class CartController {
         model.addAttribute("sum", cartService.returnCartItems()
                 .map(ci -> ci.getCount() * ci.getProduct().getPrice())
                 .reduce(0, Integer::sum));
+        model.addAttribute("balance", paymentsService.getBalance());
         return Mono.just("cart");
     }
 

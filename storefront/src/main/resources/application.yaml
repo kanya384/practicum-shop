@@ -17,3 +17,4 @@ logging:
     io.r2dbc.postgresql.QUERY: DEBUG # for queries
     io.r2dbc.postgresql.PARAM: DEBUG # for parameters
 storage-path: ./storage
+payments-service-uri: http://localhost:8090

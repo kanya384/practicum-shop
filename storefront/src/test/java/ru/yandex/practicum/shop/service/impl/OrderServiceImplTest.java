@@ -9,6 +9,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import ru.yandex.practicum.shop.exception.NoProductsInOrderException;
+import ru.yandex.practicum.shop.exception.NotEnoughMoneyException;
 import ru.yandex.practicum.shop.mapper.OrderMapperImpl;
 import ru.yandex.practicum.shop.mapper.ProductMapperImpl;
 import ru.yandex.practicum.shop.model.CartItem;
@@ -20,6 +21,7 @@ import ru.yandex.practicum.shop.repository.OrderRepository;
 import ru.yandex.practicum.shop.repository.ProductRepository;
 import ru.yandex.practicum.shop.service.CartService;
 import ru.yandex.practicum.shop.service.OrderService;
+import ru.yandex.practicum.shop.service.PaymentsService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -40,6 +42,9 @@ public class OrderServiceImplTest {
     @MockitoBean
     private CartService cartService;
 
+    @MockitoBean
+    private PaymentsService paymentsService;
+
     @Autowired
     private OrderService orderService;
 
@@ -48,6 +53,7 @@ public class OrderServiceImplTest {
         reset(cartService);
         reset(orderRepository);
         reset(orderItemRepository);
+        reset(paymentsService);
     }
 
     @Test
@@ -61,6 +67,9 @@ public class OrderServiceImplTest {
 
         when(orderItemRepository.saveAll(anyList()))
                 .thenReturn(Flux.just(new OrderItem(1L, 1L, 1L, 1)));
+
+        when(paymentsService.getBalance())
+                .thenReturn(Mono.just(10));
 
         Order order = new Order(1L, LocalDate.now());
         OrderItem orderItem = new OrderItem(1L, 1L, 1L, 1);
@@ -81,6 +90,22 @@ public class OrderServiceImplTest {
 
         verify(orderRepository, times(1)).save(any(Order.class));
         verify(orderItemRepository, times(1)).saveAll(anyList());
+    }
+
+    @Test
+    void placeOrder_shouldThrowMoneyError() {
+        Product product = new Product(1L, "title", "description", "image", 1);
+        when(orderRepository.save(any(Order.class)))
+                .thenReturn(Mono.just(new Order(1L, LocalDate.now())));
+
+        when(cartService.getCartItems())
+                .thenReturn(List.of(new CartItem(product, 1)));
+
+        when(paymentsService.getBalance())
+                .thenReturn(Mono.just(0));
+
+        StepVerifier.create(orderService.placeOrder())
+                .expectError(NotEnoughMoneyException.class);
     }
 
     @Test

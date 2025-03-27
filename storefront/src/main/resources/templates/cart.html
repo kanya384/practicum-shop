@@ -18,7 +18,11 @@
                     <path d="M15 6l-6 6l6 6"/>
                 </svg>
             </a>
-            <div class="display-flex">
+            <div class="d-flex flex-row align-items-center">
+                <div th:if="${balance != null}" class="d-flex">
+                    <span class="fw-normal mb-0" style="margin-right: 10px">Баланс: <span
+                            th:text="${balance + '₽'}"></span></span>
+                </div>
                 <a href="/orders" title="Заказы" class="btn btn-primary">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -38,7 +42,6 @@
     <div class="container h-100 py-5">
         <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col-10">
-
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h3 class="fw-normal mb-0">Корзина</h3>
                 </div>
@@ -120,13 +123,16 @@
 
                 <div class="card">
                     <div class="card-body d-flex flex-row justify-content-between align-items-center">
-                        <p style="padding:0; margin:0"><span class="text-muted">Итого: </span><span
-                                th:text="${sum}"></span></p>
+                        <p style="padding:0; margin:0">
+                            <span class="text-muted">Итого: </span><span th:text="${sum}"></span>
+                        </p>
+                        <span th:if="${balance == null}" style="color: red;">Платежный сервис недоступен!</span>
+                        <span th:if="${sum > balance && balance != null}" style="color: red;">Недостаточно средств на счете!</span>
                         <form th:action="@{/orders}"
                               method="post"
                               class="d-flex justify-content-end"
                               style="max-width:250px">
-                            <button type="submit"
+                            <button th:disabled="${balance == null || sum > balance}" type="submit"
                                     class="btn btn-sm btn-primary btn-block btn-lg">Оформить заказ
                             </button>
                         </form>

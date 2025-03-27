@@ -6,12 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
+import ru.yandex.practicum.shop.api.PaymentsApi;
+import ru.yandex.practicum.shop.domain.BalanceResponse;
 import ru.yandex.practicum.shop.dto.order.OrderResponseDTO;
 import ru.yandex.practicum.shop.repository.OrderRepository;
 import ru.yandex.practicum.shop.service.CartService;
 import ru.yandex.practicum.shop.service.OrderService;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
@@ -28,8 +32,12 @@ public class OrderControllerIntegrationTest {
     @Autowired
     OrderRepository orderRepository;
 
+    @Autowired
+    private PaymentsApi paymentsApi;
+
     @BeforeEach
     void setUp() {
+
         orderRepository.deleteAll()
                 .block();
 
@@ -50,6 +58,11 @@ public class OrderControllerIntegrationTest {
 
     @Test
     void placeOrder_shouldPlaceOrder() throws Exception {
+        var balance = new BalanceResponse();
+        balance.setMoney(1000);
+        when(paymentsApi.paymentsBalanceGet())
+                .thenReturn(Mono.just(balance));
+
         cartService
                 .addItemToCart(1L)
                 .doOnNext(c -> cartService.addItemToCart(2L))
