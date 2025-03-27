@@ -12,6 +12,14 @@ spring:
     user: sa
     password: password
     change-log: classpath:/db/changelog/db.changelog-master.xml
+  data:
+    redis:
+      password: password
+      host: localhost
+      port: 6379
+    cache:
+      redis:
+        time-to-live: PT1M
 logging:
   level:
     io.r2dbc.postgresql.QUERY: DEBUG # for queries

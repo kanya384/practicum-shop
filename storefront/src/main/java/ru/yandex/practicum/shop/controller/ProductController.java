@@ -7,6 +7,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.shop.dto.product.ProductSort;
+import ru.yandex.practicum.shop.model.CartItem;
+import ru.yandex.practicum.shop.service.CartService;
 import ru.yandex.practicum.shop.service.ProductService;
 
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
+    private final CartService cartService;
     private final List<Integer> PAGE_SIZES = List.of(10, 20, 50, 100);
 
     @GetMapping("/**")
@@ -27,6 +30,7 @@ public class ProductController {
                                      Model model) {
 
         model.addAttribute("products", productService.findAll(search, page, pageSize, sort));
+        model.addAttribute("mapProductInCart", cartService.getProductsInCartMap());
 
         model.addAttribute("params", Map.of(
                 "search", search != null ? search : "",
@@ -41,6 +45,9 @@ public class ProductController {
     public Mono<String> findById(@RequestHeader(value = HttpHeaders.REFERER, required = false) final String referrer,
                                  @PathVariable("id") Long productId, Model model) {
         model.addAttribute("product", productService.findById(productId));
+        model.addAttribute("count", cartService
+                .getCartItemById(productId)
+                .map(CartItem::getCount));
         return Mono.just("product");
     }
 }

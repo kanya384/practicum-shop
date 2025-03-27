@@ -119,7 +119,8 @@
                             <p class="card-text title" th:text="${product.title}"></p>
                         </a>
                         <div class="items-in-cart d-flex justify-content-end">
-                            <form th:if="${product.count == null}" th:action="@{${'/cart/add/' + product.id}}"
+                            <form th:if="${mapProductInCart.get(product.id) == null}"
+                                  th:action="@{${'/cart/add/' + product.id}}"
                                   method="post"
                                   onsubmit="processFormWithPrevent(event)"
                                   class="d-flex justify-content-end"
@@ -143,7 +144,8 @@
                                     </svg>
                                 </button>
                             </form>
-                            <div th:unless="${product.count == null}" class="items-in-cart-count btn-group">
+                            <div th:unless="${mapProductInCart.get(product.id) == null}"
+                                 class="items-in-cart-count btn-group">
                                 <form th:action="@{${'/cart/dec/' + product.id}}"
                                       method="post"
                                       class="d-flex justify-content-end"
@@ -156,7 +158,7 @@
                                     <button type="submit" class="btn btn-outline-secondary">-</button>
                                 </form>
                                 <button type="button" class="btn btn-outline-secondary"
-                                        th:text="${product.count}"></button>
+                                        th:text="${mapProductInCart.get(product.id).count}"></button>
                                 <form th:action="@{${'/cart/inc/' + product.id}}"
                                       method="post"
                                       onclick="processFormWithPrevent(event)"

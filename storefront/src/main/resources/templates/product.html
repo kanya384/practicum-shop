@@ -57,11 +57,12 @@
                          alt="User avatar">
                     <div class="item-body" style="padding:10px 50px">
                         <div class="d-flex flex-column flex-wrap mt-2">
-                            <h5 class="mb-5" th:text="${product.title}"></h5>
+                            <h5 th:text="${product.title}"></h5>
+                            <div class="price-text mb-3" th:text="${product.price + ' ₽'}"></div>
                             <span th:text="${product.description}"></span>
                         </div>
                         <div class="items-in-cart d-flex justify-content-end">
-                            <form th:if="${product.count == null || product.count == 0}"
+                            <form th:if="${count == null || count == 0}"
                                   th:action="@{${'/cart/add/' + product.id}}"
                                   method="post"
                                   class="d-flex justify-content-end"
@@ -82,7 +83,7 @@
                                     </svg>
                                 </button>
                             </form>
-                            <div th:unless="${product.count == null || product.count == 0}"
+                            <div th:unless="${count == null || count == 0}"
                                  class="items-in-cart-count btn-group">
                                 <form th:action="@{${'/cart/dec/' + product.id}}"
                                       method="post"
@@ -92,7 +93,7 @@
                                     <button type="submit" class="btn btn-outline-secondary">-</button>
                                 </form>
                                 <button type="button" class="btn btn-outline-secondary"
-                                        th:text="${product.count}"></button>
+                                        th:text="${count}"></button>
                                 <form th:action="@{${'/cart/inc/' + product.id}}"
                                       onclick="processFormWithPrevent(event)"
                                       method="post"

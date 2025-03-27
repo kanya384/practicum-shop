@@ -1,6 +1,7 @@
 package ru.yandex.practicum.shop.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -11,14 +12,11 @@ import reactor.core.publisher.Mono;
 import ru.yandex.practicum.shop.dto.product.*;
 import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
 import ru.yandex.practicum.shop.mapper.ProductMapper;
-import ru.yandex.practicum.shop.model.CartItem;
 import ru.yandex.practicum.shop.model.Product;
 import ru.yandex.practicum.shop.repository.ProductRepository;
 import ru.yandex.practicum.shop.service.CartService;
 import ru.yandex.practicum.shop.service.ProductService;
 import ru.yandex.practicum.shop.utils.StorageUtil;
-
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -59,25 +57,22 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(
+            value = "product",
+            key = "#id"
+    )
     public Mono<ProductResponseDTO> findById(Long id) {
-
         return productRepository.findById(id)
                 .map(productMapper::map)
-                .zipWith(cartService.getCartItemById(id)
-                        .defaultIfEmpty(CartItem.builder()
-                                .count(0)
-                                .build()))
-                .map(z -> {
-                    z.getT1().setCount(z.getT2().getCount());
-                    return z.getT1();
-                })
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("Продукт", id)));
     }
 
     @Override
+    @Cacheable(
+            value = "products"
+    )
     public Mono<ProductsPageResponseDTO> findAll(String search, int page, int pageSize, ProductSort sort) {
         Pageable pageable = PageRequest.of(page - 1, pageSize, toDbSort(sort));
-        Map<Long, CartItem> productsInCartMap = cartService.getProductsInCartMap();
 
 
         Flux<Product> products = search != null && !search.isEmpty() ?
@@ -91,12 +86,6 @@ public class ProductServiceImpl implements ProductService {
 
         return products
                 .map(productMapper::map)
-                .map(p -> {
-                    if (productsInCartMap.containsKey(p.getId())) {
-                        p.setCount(productsInCartMap.get(p.getId()).getCount());
-                    }
-                    return p;
-                })
                 .collectList()
                 .zipWith(count)
                 .map(p -> ProductsPageResponseDTO.builder()

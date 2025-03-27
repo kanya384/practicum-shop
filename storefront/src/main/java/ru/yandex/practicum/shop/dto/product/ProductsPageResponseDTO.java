@@ -1,14 +1,14 @@
 package ru.yandex.practicum.shop.dto.product;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProductsPageResponseDTO {
     private List<ProductResponseDTO> list;
     private int page;
