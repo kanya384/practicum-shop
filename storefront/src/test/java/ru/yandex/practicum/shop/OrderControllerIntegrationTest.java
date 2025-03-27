@@ -1,25 +1,29 @@
 package ru.yandex.practicum.shop;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Mono;
 import ru.yandex.practicum.shop.api.PaymentsApi;
-import ru.yandex.practicum.shop.domain.BalanceResponse;
+import ru.yandex.practicum.shop.domain.DepositMoneyRequest;
 import ru.yandex.practicum.shop.dto.order.OrderResponseDTO;
+import ru.yandex.practicum.shop.model.Cart;
+import ru.yandex.practicum.shop.model.CartItem;
+import ru.yandex.practicum.shop.model.Product;
 import ru.yandex.practicum.shop.repository.OrderRepository;
+import ru.yandex.practicum.shop.repository.ProductRepository;
 import ru.yandex.practicum.shop.service.CartService;
 import ru.yandex.practicum.shop.service.OrderService;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
-public class OrderControllerIntegrationTest {
+@DirtiesContext
+@Tag("integration")
+public class OrderControllerIntegrationTest extends AbstractTestContainer {
     @Autowired
     private WebTestClient webTestClient;
 
@@ -27,7 +31,13 @@ public class OrderControllerIntegrationTest {
     OrderService orderService;
 
     @Autowired
+    ProductRepository productRepository;
+
+    @Autowired
     CartService cartService;
+
+    @Autowired
+    Cart cart;
 
     @Autowired
     OrderRepository orderRepository;
@@ -41,8 +51,14 @@ public class OrderControllerIntegrationTest {
         orderRepository.deleteAll()
                 .block();
 
-        cartService.clearCart()
-                .block();
+        cartService.clearCart();
+
+        assertDoesNotThrow(() -> {
+            var deposit = new DepositMoneyRequest();
+            deposit.setMoney(10000);
+            paymentsApi.paymentsDepositPost(deposit)
+                    .block();
+        });
 
 
         cartService.addItemToCart(1L)
@@ -57,15 +73,9 @@ public class OrderControllerIntegrationTest {
     }
 
     @Test
-    void placeOrder_shouldPlaceOrder() throws Exception {
-        var balance = new BalanceResponse();
-        balance.setMoney(1000);
-        when(paymentsApi.paymentsBalanceGet())
-                .thenReturn(Mono.just(balance));
-
+    void placeOrder_shouldPlaceOrder() {
         cartService
                 .addItemToCart(1L)
-                .doOnNext(c -> cartService.addItemToCart(2L))
                 .block();
 
         webTestClient.post()
@@ -77,7 +87,7 @@ public class OrderControllerIntegrationTest {
     }
 
     @Test
-    void placeOrder_shouldReturnErrorIfNoItemsInOrder() throws Exception {
+    void placeOrder_shouldReturnErrorIfNoItemsInOrder() {
         webTestClient.post()
                 .uri("/orders")
                 .exchange()
@@ -85,7 +95,25 @@ public class OrderControllerIntegrationTest {
     }
 
     @Test
-    void findAll_shouldReturnOrdersList() throws Exception {
+    void placeOrder_shouldReturnErrorIfNotEnoughMoney() {
+        cart.put(1L, CartItem.builder()
+                .product(new Product(999L, "", "", "", 10000))
+                .count(1000)
+                .build());
+
+        webTestClient.post()
+                .uri("/orders")
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectBody(String.class).consumeWith(response -> {
+                    String body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("Недостаточно средств для совершения заказа"));
+                });
+    }
+
+    @Test
+    void findAll_shouldReturnOrdersList() {
         webTestClient.get()
                 .uri("/orders")
                 .exchange()
@@ -98,7 +126,7 @@ public class OrderControllerIntegrationTest {
     }
 
     @Test
-    void findById_shouldReturnOrderById() throws Exception {
+    void findById_shouldReturnOrderById() {
         cartService.addItemToCart(1L)
                 .block();
         OrderResponseDTO order = orderService.placeOrder()
@@ -117,7 +145,7 @@ public class OrderControllerIntegrationTest {
     }
 
     @Test
-    void findById_shouldReturn404IfOrderNotExists() throws Exception {
+    void findById_shouldReturn404IfOrderNotExists() {
         webTestClient.get()
                 .uri("/orders/{id}", -1)
                 .exchange()

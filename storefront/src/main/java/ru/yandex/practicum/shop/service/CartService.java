@@ -17,7 +17,7 @@ public interface CartService {
 
     Mono<Long> decreaseItemCount(Long productId);
 
-    Mono<Void> clearCart();
+    void clearCart();
 
     List<CartItem> getCartItems();
 

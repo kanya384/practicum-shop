@@ -12,8 +12,6 @@ services:
       POSTGRES_DB: shop
     networks:
       - app-net
-    ports:
-      - 5432:5432
   pg_payments:
     image: 'postgres:17'
     container_name: 'pg_payments'
@@ -23,15 +21,40 @@ services:
       POSTGRES_DB: payments
     networks:
       - app-net
-    ports:
-      - 5433:5432
   redis:
     container_name: 'redis'
     image: redis:7.4.2-bookworm
     restart: always
-    ports:
-      - "6379:6379"
     environment:
       - REDIS_PASSWORD=password
       - REDIS_PORT=6379
       - REDIS_DATABASES=16
+    networks:
+      - app-net
+  storefront:
+    container_name: storefront
+    build:
+      dockerfile: Dockerfile-storefront
+      context: .
+    ports:
+      - 8080:8080
+    depends_on:
+      - pg_shop
+      - redis
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    networks:
+      - app-net
+  payments:
+    container_name: payments
+    build:
+      dockerfile: Dockerfile-payments
+      context: .
+    ports:
+      - 8090:8090
+    depends_on:
+      - pg_payments
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    networks:
+      - app-net

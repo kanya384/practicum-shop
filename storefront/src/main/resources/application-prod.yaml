@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: shop
+  r2dbc:
+    url: r2dbc:postgresql://pg_shop/shop
+    username: sa
+    password: password
+  jpa:
+    show-sql: false
+  liquibase:
+    url: jdbc:postgresql://pg_shop/shop
+    user: sa
+    password: password
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+  data:
+    redis:
+      password: password
+      host: redis
+      port: 6379
+    cache:
+      redis:
+        time-to-live: PT1M
+logging:
+  level:
+    io.r2dbc.postgresql.QUERY: DEBUG # for queries
+    io.r2dbc.postgresql.PARAM: DEBUG # for parameters
+storage-path: ./storage
+payments-service-uri: http://payments:8090

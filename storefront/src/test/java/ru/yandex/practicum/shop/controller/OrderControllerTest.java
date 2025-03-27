@@ -39,7 +39,6 @@ public class OrderControllerTest {
                 .description("description")
                 .image("image")
                 .price(100)
-                .count(0)
                 .build();
 
         OrderItemResponseDTO orderItemResponseDTO = OrderItemResponseDTO.builder()
@@ -95,7 +94,6 @@ public class OrderControllerTest {
                 .description("description")
                 .image("image")
                 .price(100)
-                .count(0)
                 .build();
 
         OrderItemResponseDTO orderItemResponseDTO = OrderItemResponseDTO.builder()
@@ -133,7 +131,6 @@ public class OrderControllerTest {
                 .description("description")
                 .image("image")
                 .price(100)
-                .count(0)
                 .build();
 
         OrderItemResponseDTO orderItemResponseDTO = OrderItemResponseDTO.builder()

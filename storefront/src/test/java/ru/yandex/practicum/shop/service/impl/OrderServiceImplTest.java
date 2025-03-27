@@ -73,9 +73,7 @@ public class OrderServiceImplTest {
 
         Order order = new Order(1L, LocalDate.now());
         OrderItem orderItem = new OrderItem(1L, 1L, 1L, 1);
-
-        when(cartService.clearCart())
-                .thenReturn(Mono.empty());
+        
         when(orderRepository.findById(1L))
                 .thenReturn(Mono.just(order));
         when(orderItemRepository.findAllByOrderId(1L))

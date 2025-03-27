@@ -139,8 +139,7 @@ public class CartServiceImplTest {
 
     @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
     void clearCart_shouldClearCart() {
-        StepVerifier.create(cartService.clearCart())
-                .verifyComplete();
+        cartService.clearCart();
 
         assertEquals(0, cart.size());
     }

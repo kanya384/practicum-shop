@@ -1,0 +1,16 @@
+server:
+  port: 8090
+spring:
+  application:
+    name: payments
+  r2dbc:
+    url: r2dbc:postgresql://pg_payments/payments
+    username: sa
+    password: password
+  jpa:
+    show-sql: false
+  liquibase:
+    url: jdbc:postgresql://pg_payments/payments
+    user: sa
+    password: password
+    change-log: classpath:/db/changelog/db.changelog-master.xml

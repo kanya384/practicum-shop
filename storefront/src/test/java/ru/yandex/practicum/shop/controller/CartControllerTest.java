@@ -13,6 +13,7 @@ import ru.yandex.practicum.shop.dto.product.ProductResponseDTO;
 import ru.yandex.practicum.shop.exception.AlreadyExistsInCartException;
 import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
 import ru.yandex.practicum.shop.service.CartService;
+import ru.yandex.practicum.shop.service.PaymentsService;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,6 +27,9 @@ public class CartControllerTest {
     @MockitoBean
     CartService cartService;
 
+    @MockitoBean
+    PaymentsService paymentsService;
+
     @Test
     void getCartItems_shouldReturnProductsList() {
         ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
@@ -34,7 +38,6 @@ public class CartControllerTest {
                 .description("description")
                 .image("image")
                 .price(100)
-                .count(0)
                 .build();
 
         when(cartService.returnCartItems())

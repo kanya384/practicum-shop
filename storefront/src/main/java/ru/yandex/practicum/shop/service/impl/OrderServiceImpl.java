@@ -57,6 +57,8 @@ public class OrderServiceImpl implements OrderService {
                     }
                     return Mono.just(b);
                 })
+                .flatMap(b -> paymentsService.processPayment(cartService.getCartItems()
+                        .stream().mapToInt(CartItem::getTotalPrice).sum()))
                 .flatMap(b -> orderRepository.save(new Order()))
                 .switchIfEmpty(Mono.error(new InternalError("ошибка сохранения заказа")))
                 .map(order -> cartService.getCartItems()
@@ -71,8 +73,7 @@ public class OrderServiceImpl implements OrderService {
                 )
                 .map(orderItemRepository::saveAll)
                 .switchIfEmpty(Mono.error(new InternalError("ошибка сохранения заказа")))
-                .doOnNext(c -> cartService.clearCart()
-                        .block())
+                .doOnNext(c -> cartService.clearCart())
                 .flatMap(Flux::collectList)
                 .flatMap(l -> findById(l.getFirst().getOrderId()));
     }

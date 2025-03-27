@@ -10,9 +10,11 @@ import ru.yandex.practicum.shop.dto.product.ProductResponseDTO;
 import ru.yandex.practicum.shop.dto.product.ProductSort;
 import ru.yandex.practicum.shop.dto.product.ProductsPageResponseDTO;
 import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
+import ru.yandex.practicum.shop.service.CartService;
 import ru.yandex.practicum.shop.service.ProductService;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,6 +28,9 @@ public class ProductControllerTest {
 
     @MockitoBean
     private ProductService productService;
+
+    @MockitoBean
+    private CartService cartService;
 
     @Test
     void productsList_shouldReturnProductsList() throws Exception {
@@ -48,6 +53,9 @@ public class ProductControllerTest {
 
         when(productService.findAll(null, 1, 10, ProductSort.EMPTY))
                 .thenReturn(Mono.just(productsPageResponseDTO));
+
+        when(cartService.getProductsInCartMap())
+                .thenReturn(Map.of());
 
         webTestClient.get()
                 .uri("/products")
@@ -73,6 +81,8 @@ public class ProductControllerTest {
 
         when(productService.findById(1L))
                 .thenReturn(Mono.just(productResponseDTO));
+        when(cartService.getCartItemById(1L))
+                .thenReturn(Mono.empty());
 
         webTestClient.get()
                 .uri("/products/{id}", 1L)

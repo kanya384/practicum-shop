@@ -4,33 +4,33 @@
 
 ## Использование
 
-На устройстве должен быть установлен и запущен Docker. Для запуска базы данных в docker-контейнере нужно выполнить
-команду:
+На устройстве должен быть установлен и запущен Docker. Для сборки и запуска приложения выполните команду:
 
 ```sh
-docker pull postgres:17.4 && docker run -d --name pg_shop -p 5432:5432 -e POSTGRES_USER=sa -e POSTGRES_PASSWORD=password -e POSTGRES_DB=shop postgres:17.4
-```
-
-Для запуска тестов использовать команду:
-
-```sh
-./gradlew clean test
-```
-
-Для локальной сборки приложение использовать команду:
-
-```sh
-./gradlew clean bootJar
-```
-
-Для локальной запуска приложения выполнить (после сборки):
-
-```sh
-./build/libs/shop-0.0.1-SNAPSHOT.jar
+docker compose up -d
 ```
 
 Приложение будет доступно по адресу:
 
 ```
-http://<адрес контейнера>/products
+http://localhost:8080/products
+```
+
+Для запуска юнит тестов использовать команду:
+
+```sh
+./gradlew payments:unit
+./gradlew storefront:unit
+```
+
+Для запуска интеграционных тестов для витрины нужно запустить сервис платежей:
+
+```sh
+docker pull postgres:17.4 && docker run -d --name pg_pmnts -p 5433:5432 -e POSTGRES_USER=sa -e POSTGRES_PASSWORD=password -e POSTGRES_DB=payments postgres:17.4 && ./gradlew :payments:bootRun
+```
+
+И затем сами тесты:
+
+```sh
+./gradlew :storefront:integration
 ```

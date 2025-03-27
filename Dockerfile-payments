@@ -3,11 +3,11 @@ FROM amazoncorretto:21 as builder
 WORKDIR app
 COPY . .
 
-RUN ./gradlew clean bootJar
+RUN ./gradlew :payments:clean :payments:bootJar
 
 FROM amazoncorretto:21
 
-COPY --from=builder /app/build/libs/*.jar app.jar
+COPY --from=builder /app/payments/build/libs/*.jar app.jar
 
 EXPOSE 8080
 

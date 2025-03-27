@@ -1,18 +1,21 @@
 package ru.yandex.practicum.shop;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import ru.yandex.practicum.shop.service.ProductService;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+
 @AutoConfigureWebTestClient
-public class ProductControllerIntegrationTest {
+@DirtiesContext
+@Tag("integration")
+public class ProductControllerIntegrationTest extends AbstractTestContainer {
     @Autowired
     private WebTestClient webTestClient;
 
@@ -20,7 +23,7 @@ public class ProductControllerIntegrationTest {
     private ProductService productService;
 
     @Test
-    void productsList_shouldReturnProductsList() throws Exception {
+    void productsList_shouldReturnProductsList() {
         webTestClient.get()
                 .uri("/products")
                 .exchange()
@@ -33,7 +36,7 @@ public class ProductControllerIntegrationTest {
     }
 
     @Test
-    void findById_shouldReturnProductById() throws Exception {
+    void findById_shouldReturnProductById() {
         webTestClient.get()
                 .uri("/products/{id}", 1L)
                 .exchange()
@@ -46,7 +49,7 @@ public class ProductControllerIntegrationTest {
     }
 
     @Test
-    void findById_shouldReturn404Page() throws Exception {
+    void findById_shouldReturn404Page() {
         webTestClient.get()
                 .uri("/products/{id}", -1)
                 .exchange()

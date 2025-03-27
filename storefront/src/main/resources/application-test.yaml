@@ -1,16 +1,10 @@
 spring:
   application:
     name: shop
-  sql:
-    init:
-      mode: always
-  r2dbc:
-    url: r2dbc:postgresql://localhost/test
-    username: sa
-    password: password
   liquibase:
     url: jdbc:postgresql://localhost/test
     user: sa
     password: password
     change-log: classpath:/db/changelog/db.changelog-master.xml
 storage-path: ./storage
+payments-service-uri: http://localhost:8090

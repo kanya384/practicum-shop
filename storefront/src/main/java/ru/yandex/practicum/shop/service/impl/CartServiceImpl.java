@@ -84,8 +84,8 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Mono<Void> clearCart() {
-        return Mono.fromRunnable(cart::clear);
+    public void clearCart() {
+        cart.clear();
     }
 
     public List<CartItem> getCartItems() {
