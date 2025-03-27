@@ -19,8 +19,8 @@ http://localhost:8080/products
 Для запуска юнит тестов использовать команду:
 
 ```sh
-./gradlew payments:unit
-./gradlew storefront:unit
+./gradlew :payments:unit
+./gradlew :storefront:unit
 ```
 
 Для запуска интеграционных тестов для витрины нужно запустить сервис платежей:
