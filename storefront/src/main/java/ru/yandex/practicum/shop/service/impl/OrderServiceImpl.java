@@ -2,6 +2,7 @@ package ru.yandex.practicum.shop.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -13,7 +14,6 @@ import ru.yandex.practicum.shop.exception.NotEnoughMoneyException;
 import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
 import ru.yandex.practicum.shop.mapper.OrderMapper;
 import ru.yandex.practicum.shop.mapper.ProductMapper;
-import ru.yandex.practicum.shop.model.CartItem;
 import ru.yandex.practicum.shop.model.Order;
 import ru.yandex.practicum.shop.model.OrderItem;
 import ru.yandex.practicum.shop.model.Product;
@@ -27,6 +27,7 @@ import ru.yandex.practicum.shop.service.PaymentsService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -39,43 +40,37 @@ public class OrderServiceImpl implements OrderService {
     private final CartService cartService;
     private final PaymentsService paymentsService;
 
+    //TODO: get user_id from Authorization
+    private final UUID userId = UUID.randomUUID();
+
     @Transactional
     @Override
     public Mono<OrderResponseDTO> placeOrder() {
-        if (cartService.getCartItems().isEmpty()) {
-            return Mono.error(new NoProductsInOrderException("ошибка сохранения заказа"));
-        }
+        return cartService.getCountOfCartItems()
+                .map(count -> count == 0)
+                .flatMap(isEmpty -> {
+                    if (isEmpty) {
+                        return Mono.error(new NoProductsInOrderException("ошибка сохранения заказа"));
+                    }
 
-        return paymentsService.getBalance()
+                    return Mono.empty();
+                })
+                .flatMap(c -> paymentsService.getBalance())
+                .zipWith(cartService.getSumOfCartItems())
                 .flatMap(b -> {
-                    var orderSum = cartService.getCartItems()
-                            .stream()
-                            .mapToInt(CartItem::getTotalPrice)
-                            .sum();
-                    if (orderSum > b) {
+                    var balance = b.getT1();
+                    var orderSum = b.getT2();
+
+                    if (orderSum > balance) {
                         return Mono.error(new NotEnoughMoneyException("Недостаточно средств для совершения заказа"));
                     }
-                    return Mono.just(b);
+                    return Mono.just(orderSum);
                 })
-                .flatMap(b -> paymentsService.processPayment(cartService.getCartItems()
-                        .stream().mapToInt(CartItem::getTotalPrice).sum()))
+                .flatMap(paymentsService::processPayment)
                 .flatMap(b -> orderRepository.save(new Order()))
                 .switchIfEmpty(Mono.error(new InternalError("ошибка сохранения заказа")))
-                .map(order -> cartService.getCartItems()
-                        .stream()
-                        .map(ci -> {
-                            OrderItem orderItem = new OrderItem();
-                            orderItem.setProductId(ci.getProduct().getId());
-                            orderItem.setCount(ci.getCount());
-                            orderItem.setOrderId(order.getId());
-                            return orderItem;
-                        }).toList()
-                )
-                .map(orderItemRepository::saveAll)
-                .switchIfEmpty(Mono.error(new InternalError("ошибка сохранения заказа")))
-                .doOnNext(c -> cartService.clearCart())
-                .flatMap(Flux::collectList)
-                .flatMap(l -> findById(l.getFirst().getOrderId()));
+                .flatMap(o -> storeOrderItems(o.getId()))
+                .flatMap(this::findById);
     }
 
     @Override
@@ -102,6 +97,23 @@ public class OrderServiceImpl implements OrderService {
                         .id(o.getId())
                         .createdAt(o.getCreatedAt())
                         .build());
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    private Mono<Long> storeOrderItems(Long orderId) {
+        return cartService.getCartItems()
+                .map(ci -> {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setProductId(ci.getProductId());
+                    orderItem.setCount(ci.getCount());
+                    orderItem.setOrderId(orderId);
+                    return orderItem;
+                })
+                .collectList()
+                .map(orderItemRepository::saveAll)
+                .doOnNext(c -> cartService.clearCart().block())
+                .flatMap(Flux::collectList)
+                .map(l -> l.getFirst().getOrderId());
     }
 
     private Mono<List<OrderItemResponseDTO>> findOrderItemsByOrderId(Long orderId) {

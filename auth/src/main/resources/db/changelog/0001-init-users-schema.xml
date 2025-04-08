@@ -3,25 +3,35 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
-    <changeSet id="create_order_table" author="laurkan">
+
+    <changeSet id="create_users_table" author="laurkan">
         <preConditions>
             <not>
-                <tableExists tableName="orders"/>
+                <tableExists tableName="users"/>
             </not>
         </preConditions>
-        <createTable tableName="orders">
+        <createTable tableName="users">
             <column name="id" type="bigserial">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="user_id" type="bigint">
+            <column name="login" type="varchar">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="password" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="varchar">
                 <constraints nullable="false"/>
             </column>
             <column name="created_at" type="timestamp">
                 <constraints nullable="false"/>
             </column>
+            <column name="modified_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
         <rollback>
-            <dropTable tableName="orders"/>
+            <dropTable tableName="users"/>
         </rollback>
     </changeSet>
 </databaseChangeLog>

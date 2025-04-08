@@ -23,6 +23,7 @@ import ru.yandex.practicum.shop.repository.ProductRepository;
 import ru.yandex.practicum.shop.utils.StorageUtil;
 
 import java.util.Map;
+import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
@@ -179,7 +180,7 @@ public class ProductServiceImplTest {
                 .build();
 
         when(cartService.getCartItemById(any(Long.class)))
-                .thenReturn(Mono.just(new CartItem(product, 1)));
+                .thenReturn(Mono.just(new CartItem(UUID.randomUUID(), product.getId(), 1)));
 
 
         when(productMapper.map(any(Product.class)))
@@ -233,8 +234,8 @@ public class ProductServiceImplTest {
                 .thenReturn(Mono.just(2));
 
         when(cartService.getProductsInCartMap())
-                .thenReturn(Map.of(
-                        1L, new CartItem(product1, 1))
+                .thenReturn(Mono.just(Map.of(
+                        1L, new CartItem(UUID.randomUUID(), product1.getId(), 1)))
                 );
 
         var result = productService.findAll(null, 1, 10, ProductSort.EMPTY);
@@ -268,9 +269,9 @@ public class ProductServiceImplTest {
         when(productRepository.countAllByTitleOrDescription(any(String.class))).thenReturn(Mono.just(2));
 
         when(cartService.getProductsInCartMap())
-                .thenReturn(Map.of(
-                        1L, new CartItem(product1, 1))
-                );
+                .thenReturn(Mono.just(Map.of(
+                        1L, new CartItem(UUID.randomUUID(), product1.getId(), 1))
+                ));
 
         var result = productService.findAll("search", 10, 11, ProductSort.EMPTY);
 

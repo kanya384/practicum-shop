@@ -55,7 +55,7 @@ public class ProductControllerTest {
                 .thenReturn(Mono.just(productsPageResponseDTO));
 
         when(cartService.getProductsInCartMap())
-                .thenReturn(Map.of());
+                .thenReturn(Mono.just(Map.of()));
 
         webTestClient.get()
                 .uri("/products")

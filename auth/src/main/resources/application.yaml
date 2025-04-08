@@ -1,0 +1,32 @@
+server:
+  port: 8080
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: shop
+  security:
+    enable-csrf: true
+    oauth2:
+      authorizationserver:
+        issuer: http://auth-server:9000
+  r2dbc:
+    url: r2dbc:postgresql://localhost/auth
+    username: sa
+    password: password
+  jpa:
+    show-sql: false
+  liquibase:
+    url: jdbc:postgresql://localhost/auth
+    user: sa
+    password: password
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+  data:
+    redis:
+      password: password
+      host: localhost
+      port: 6379
+logging:
+  level:
+    io.r2dbc.postgresql.QUERY: DEBUG # for queries
+    io.r2dbc.postgresql.PARAM: DEBUG # for parameters

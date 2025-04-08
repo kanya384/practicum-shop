@@ -5,7 +5,6 @@ import reactor.core.publisher.Mono;
 import ru.yandex.practicum.shop.dto.cart.CartItemResponseDTO;
 import ru.yandex.practicum.shop.model.CartItem;
 
-import java.util.List;
 import java.util.Map;
 
 public interface CartService {
@@ -17,11 +16,15 @@ public interface CartService {
 
     Mono<Long> decreaseItemCount(Long productId);
 
-    void clearCart();
+    Mono<Void> clearCart();
 
-    List<CartItem> getCartItems();
+    Flux<CartItem> getCartItems();
 
-    Map<Long, CartItem> getProductsInCartMap();
+    Mono<Map<Long, CartItem>> getProductsInCartMap();
+
+    Mono<Integer> getSumOfCartItems();
+
+    Mono<Long> getCountOfCartItems();
 
     Mono<CartItem> getCartItemById(Long id);
 

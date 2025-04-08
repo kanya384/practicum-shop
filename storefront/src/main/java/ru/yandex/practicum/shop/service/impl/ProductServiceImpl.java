@@ -14,7 +14,6 @@ import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
 import ru.yandex.practicum.shop.mapper.ProductMapper;
 import ru.yandex.practicum.shop.model.Product;
 import ru.yandex.practicum.shop.repository.ProductRepository;
-import ru.yandex.practicum.shop.service.CartService;
 import ru.yandex.practicum.shop.service.ProductService;
 import ru.yandex.practicum.shop.utils.StorageUtil;
 
@@ -23,7 +22,6 @@ import ru.yandex.practicum.shop.utils.StorageUtil;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
-    private final CartService cartService;
     private final StorageUtil storageUtil;
 
     @Transactional

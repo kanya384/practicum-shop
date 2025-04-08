@@ -1,0 +1,53 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create_cart_item_table" author="laurkan">
+        <preConditions>
+            <not>
+                <tableExists tableName="cart_item"/>
+            </not>
+        </preConditions>
+        <createTable tableName="cart_item">
+            <column name="id" type="bigserial">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="count" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="cart_item"/>
+        </rollback>
+    </changeSet>
+    <changeSet id="create_cart_item_foreign_key_product" author="laurkan">
+        <preConditions>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_cart_item_product"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="cart_item"
+                                 baseColumnNames="product_id"
+                                 referencedTableName="product"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 constraintName="fk_cart_item_product"/>
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="cart_item" constraintName="fk_cart_item_product"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

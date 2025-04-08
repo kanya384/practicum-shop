@@ -16,7 +16,7 @@ public abstract class OrderMapper {
 
     public static OrderItem map(CartItem cartItem) {
         OrderItem orderItem = new OrderItem();
-        orderItem.setProductId(cartItem.getProduct().getId());
+        orderItem.setProductId(cartItem.getProductId());
         orderItem.setCount(cartItem.getCount());
         return orderItem;
     }

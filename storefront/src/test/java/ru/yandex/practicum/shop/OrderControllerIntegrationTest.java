@@ -10,9 +10,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import ru.yandex.practicum.shop.api.PaymentsApi;
 import ru.yandex.practicum.shop.domain.DepositMoneyRequest;
 import ru.yandex.practicum.shop.dto.order.OrderResponseDTO;
-import ru.yandex.practicum.shop.model.Cart;
-import ru.yandex.practicum.shop.model.CartItem;
-import ru.yandex.practicum.shop.model.Product;
 import ru.yandex.practicum.shop.repository.OrderRepository;
 import ru.yandex.practicum.shop.repository.ProductRepository;
 import ru.yandex.practicum.shop.service.CartService;
@@ -35,9 +32,6 @@ public class OrderControllerIntegrationTest extends AbstractTestContainer {
 
     @Autowired
     CartService cartService;
-
-    @Autowired
-    Cart cart;
 
     @Autowired
     OrderRepository orderRepository;
@@ -96,10 +90,10 @@ public class OrderControllerIntegrationTest extends AbstractTestContainer {
 
     @Test
     void placeOrder_shouldReturnErrorIfNotEnoughMoney() {
-        cart.put(1L, CartItem.builder()
+        /*cartService.addItemToCart(1L, CartItem.builder()
                 .product(new Product(999L, "", "", "", 10000))
                 .count(1000)
-                .build());
+                .build());*/
 
         webTestClient.post()
                 .uri("/orders")

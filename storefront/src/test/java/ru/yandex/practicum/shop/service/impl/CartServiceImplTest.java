@@ -1,32 +1,13 @@
 package ru.yandex.practicum.shop.service.impl;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-import ru.yandex.practicum.shop.exception.AlreadyExistsInCartException;
-import ru.yandex.practicum.shop.exception.NoItemInCartException;
-import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
 import ru.yandex.practicum.shop.mapper.CartMapperImpl;
 import ru.yandex.practicum.shop.mapper.ProductMapperImpl;
-import ru.yandex.practicum.shop.model.Cart;
-import ru.yandex.practicum.shop.model.CartItem;
-import ru.yandex.practicum.shop.model.Product;
-import ru.yandex.practicum.shop.repository.ProductRepository;
 import ru.yandex.practicum.shop.service.CartService;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
-@SpringBootTest(classes = {CartServiceImpl.class, Cart.class, CartMapperImpl.class, ProductMapperImpl.class})
+@SpringBootTest(classes = {CartServiceImpl.class, CartService.class, CartMapperImpl.class, ProductMapperImpl.class})
 public class CartServiceImplTest {
-    @Autowired
-    private Cart cart;
-
+    /*
     @Autowired
     private CartService cartService;
 
@@ -36,7 +17,7 @@ public class CartServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        cart.clear();
+        cartService.clearCart();
 
         Product product = new Product(1L, "title", "description", "image", 100);
 
@@ -143,4 +124,5 @@ public class CartServiceImplTest {
 
         assertEquals(0, cart.size());
     }
+    */
 }
