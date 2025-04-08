@@ -25,6 +25,11 @@ tasks.register('openApiGenerate', GenerateTask) {
     ])
 }
 
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.boot:spring-security-oauth2-jose'
+}
+
 sourceSets.main.java.srcDir "$projectDir/build/generated/src/main/java"
 
 tasks.named('compileJava') {

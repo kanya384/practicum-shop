@@ -1,4 +1,4 @@
-package ru.yandex.practicum.auth.mapper;
+package ru.yandex.practicum.shop.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.Mapper;
@@ -7,9 +7,9 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.yandex.practicum.auth.dto.CreateUserDTO;
-import ru.yandex.practicum.auth.dto.UserResponseDTO;
-import ru.yandex.practicum.auth.model.User;
+import ru.yandex.practicum.shop.dto.user.CreateUserDTO;
+import ru.yandex.practicum.shop.dto.user.UserResponseDTO;
+import ru.yandex.practicum.shop.model.User;
 
 @Mapper(
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,

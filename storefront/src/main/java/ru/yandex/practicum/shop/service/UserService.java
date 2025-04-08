@@ -1,8 +1,8 @@
-package ru.yandex.practicum.auth.service;
+package ru.yandex.practicum.shop.service;
 
 import reactor.core.publisher.Mono;
-import ru.yandex.practicum.auth.dto.CreateUserDTO;
-import ru.yandex.practicum.auth.dto.UserResponseDTO;
+import ru.yandex.practicum.shop.dto.user.CreateUserDTO;
+import ru.yandex.practicum.shop.dto.user.UserResponseDTO;
 
 public interface UserService {
     Mono<UserResponseDTO> save(CreateUserDTO data);

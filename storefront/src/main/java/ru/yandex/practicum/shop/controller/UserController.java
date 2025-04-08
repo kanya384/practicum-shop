@@ -1,4 +1,4 @@
-package ru.yandex.practicum.auth.controller;
+package ru.yandex.practicum.shop.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import reactor.core.publisher.Mono;
-import ru.yandex.practicum.auth.dto.CreateUserDTO;
-import ru.yandex.practicum.auth.service.UserService;
+import ru.yandex.practicum.shop.dto.user.CreateUserDTO;
+import ru.yandex.practicum.shop.service.UserService;
 
 @Controller
 @RequiredArgsConstructor

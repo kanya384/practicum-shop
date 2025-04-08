@@ -50,4 +50,20 @@
             <dropForeignKeyConstraint baseTableName="cart_item" constraintName="fk_cart_item_product"/>
         </rollback>
     </changeSet>
+    <changeSet id="create_cart_item_foreign_key_user" author="laurkan">
+        <preConditions>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_cart_item_user"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="cart_item"
+                                 baseColumnNames="user_id"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 onDelete="NO ACTION"
+                                 constraintName="fk_cart_item_user"/>
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="cart_item" constraintName="fk_cart_item_user"/>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

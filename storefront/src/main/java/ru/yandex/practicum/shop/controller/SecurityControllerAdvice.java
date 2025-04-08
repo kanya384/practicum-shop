@@ -1,4 +1,4 @@
-package ru.yandex.practicum.auth.controller;
+package ru.yandex.practicum.shop.controller;
 
 import org.springframework.security.web.server.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.ControllerAdvice;

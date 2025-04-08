@@ -1,14 +1,16 @@
+server:
+  port: 8081
 spring:
   application:
     name: shop
   r2dbc:
-    url: r2dbc:postgresql://localhost/shop
+    url: r2dbc:postgresql://localhost:5432/shop
     username: sa
     password: password
   jpa:
     show-sql: false
   liquibase:
-    url: jdbc:postgresql://localhost/shop
+    url: jdbc:postgresql://localhost:5432/shop
     user: sa
     password: password
     change-log: classpath:/db/changelog/db.changelog-master.xml
@@ -20,9 +22,27 @@ spring:
     cache:
       redis:
         time-to-live: PT1M
+  security:
+    security:
+      enable-csrf: true
+#    client:
+#      provider:
+#        keycloak:
+#          authorization-uri: http://localhost:8080/realms/master/protocol/openid-connect/auth
+#          token-uri: http://localhost:8080/realms/master/protocol/openid-connect/token
+#          user-info-uri: http://localhost:8080/realms/master/protocol/openid-connect/userinfo
+#          user-name-attribute: sub
+#          jwk-set-uri: http://localhost:8080/realms/master/protocol/openid-connect/certs
+#      registration:
+#        yandex: # Описание клиента OAuth2
+#          provider: keycloak
+#          authorizationGrantType: authorization_code
+#          client-id: storefront
+#          client-secret: B3ng9yo1mXqEgTc2V05dbhkmpoLPL3Jb
+#          scope: openid, profile, email
 logging:
   level:
-    io.r2dbc.postgresql.QUERY: DEBUG # for queries
-    io.r2dbc.postgresql.PARAM: DEBUG # for parameters
+    io.r2dbc.postgresql.QUERY: DEBUG
+    io.r2dbc.postgresql.PARAM: DEBUG
 storage-path: ./storage
 payments-service-uri: http://localhost:8090

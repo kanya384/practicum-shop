@@ -1,4 +1,4 @@
-package ru.yandex.practicum.auth.dto;
+package ru.yandex.practicum.shop.dto.user;
 
 import lombok.Getter;
 import lombok.Setter;

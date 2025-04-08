@@ -5,9 +5,10 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <include file="0001-init-product-schema.xml" relativeToChangelogFile="true"/>
-    <include file="0002-init-order-schema.xml" relativeToChangelogFile="true"/>
-    <include file="0003-init-order-item-schema.xml" relativeToChangelogFile="true"/>
-    <include file="0004-load-products-from-file.xml" relativeToChangelogFile="true"/>
-    <include file="0005-init-cart-item-schema.xml" relativeToChangelogFile="true"/>
+    <include file="0002-init-users-schema.xml" relativeToChangelogFile="true"/>
+    <include file="0003-init-order-schema.xml" relativeToChangelogFile="true"/>
+    <include file="0004-init-order-item-schema.xml" relativeToChangelogFile="true"/>
+    <include file="0005-load-products-from-file.xml" relativeToChangelogFile="true"/>
+    <include file="0006-init-cart-item-schema.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

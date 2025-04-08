@@ -1,4 +1,4 @@
-package ru.yandex.practicum.auth.model;
+package ru.yandex.practicum.shop.model;
 
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
