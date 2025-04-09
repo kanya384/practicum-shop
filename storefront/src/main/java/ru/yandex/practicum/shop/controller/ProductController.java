@@ -2,6 +2,7 @@ package ru.yandex.practicum.shop.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -27,10 +28,13 @@ public class ProductController {
                                      @RequestParam(value = "page", defaultValue = "1") int page,
                                      @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
                                      @RequestParam(value = "sort", defaultValue = "") ProductSort sort,
-                                     Model model) {
+                                     Model model,
+                                     Authentication authentication
+    ) {
 
         model.addAttribute("products", productService.findAll(search, page, pageSize, sort));
         model.addAttribute("mapProductInCart", cartService.getProductsInCartMap());
+        model.addAttribute("isAnonymous", authentication == null);
 
         model.addAttribute("params", Map.of(
                 "search", search != null ? search : "",
@@ -43,11 +47,12 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public Mono<String> findById(@RequestHeader(value = HttpHeaders.REFERER, required = false) final String referrer,
-                                 @PathVariable("id") Long productId, Model model) {
+                                 @PathVariable("id") Long productId, Model model, Authentication authentication) {
         model.addAttribute("product", productService.findById(productId));
         model.addAttribute("count", cartService
-                .getCartItemById(productId)
+                .getCartItemByProductId(productId)
                 .map(CartItem::getCount));
+        model.addAttribute("isAnonymous", authentication == null);
         return Mono.just("product");
     }
 }

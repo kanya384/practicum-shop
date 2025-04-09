@@ -5,16 +5,19 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.shop.dto.cart.CartItemResponseDTO;
-import ru.yandex.practicum.shop.exception.AlreadyExistsInCartException;
 import ru.yandex.practicum.shop.exception.NoItemInCartException;
 import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
 import ru.yandex.practicum.shop.mapper.CartMapper;
+import ru.yandex.practicum.shop.mapper.ProductMapper;
 import ru.yandex.practicum.shop.model.CartItem;
 import ru.yandex.practicum.shop.model.Product;
 import ru.yandex.practicum.shop.repository.CartItemRepository;
 import ru.yandex.practicum.shop.repository.ProductRepository;
 import ru.yandex.practicum.shop.service.CartService;
+import ru.yandex.practicum.shop.utils.SecurityUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -23,28 +26,26 @@ public class CartServiceImpl implements CartService {
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
     private final CartMapper cartMapper;
+    private final ProductMapper productMapper;
 
-    //TODO: get user_id from Authorization
-    private final Long userId = 1L;
 
     public synchronized Mono<Long> addItemToCart(Long productId) {
-        return Mono.just(cartItemRepository.findByUserIdAndProductId(userId, productId))
-                .switchIfEmpty(Mono.error(new AlreadyExistsInCartException(String.format("Продукт c id = %d уже в корзине", productId))))
-                .flatMap(ci -> productRepository.findById(productId))
-                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Продукт", productId)))
-                .doOnNext((product) -> cartItemRepository.save(new CartItem(userId, productId, 1)))
+        return SecurityUtils.getUserId()
+                .flatMap((userId) -> cartItemRepository.save(new CartItem(userId, productId, 1)))
                 .map(p -> productId);
     }
 
     public Mono<Long> removeItemFromCart(Long productId) {
-        return cartItemRepository.findByUserIdAndProductId(userId, productId)
+
+        return SecurityUtils.getUserId()
+                .flatMap(userId -> cartItemRepository.findByUserIdAndProductId(userId, productId))
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("Продукт", productId)))
-                .doOnNext(cartItem -> cartItemRepository.deleteById(cartItem.getId()))
-                .map(CartItem::getId);
+                .flatMap(cartItem -> cartItemRepository.deleteById(cartItem.getId()).thenReturn(productId));
     }
 
     public synchronized Mono<Long> increaseItemCount(Long productId) {
-        return cartItemRepository.findByUserIdAndProductId(userId, productId)
+        return SecurityUtils.getUserId()
+                .flatMap(userId -> cartItemRepository.findByUserIdAndProductId(userId, productId))
                 .switchIfEmpty(Mono.error(new NoItemInCartException(String.format("Продукта c id = %d нет в корзине", productId))))
                 .doOnNext(CartItem::inc)
                 .flatMap(cartItemRepository::save)
@@ -52,42 +53,51 @@ public class CartServiceImpl implements CartService {
     }
 
     public synchronized Mono<Long> decreaseItemCount(Long productId) {
-        return cartItemRepository.findByUserIdAndProductId(userId, productId)
+        return SecurityUtils.getUserId()
+                .flatMap(userId -> cartItemRepository.findByUserIdAndProductId(userId, productId))
                 .switchIfEmpty(Mono.error(new NoItemInCartException(String.format("Продукта c id = %d нет в корзине", productId))))
                 .doOnNext(CartItem::dec)
-                .doOnNext(ci -> {
+                .flatMap(ci -> {
                     if (ci.getCount() == 0) {
-                        cartItemRepository.deleteById(ci.getId());
+                        return cartItemRepository.deleteById(ci.getId())
+                                .thenReturn(ci.getId());
                     } else {
-                        cartItemRepository.save(ci);
+                        return cartItemRepository.save(ci).
+                                map(p -> ci.getId());
                     }
-                })
-                .map(CartItem::getId);
+                });
     }
 
     @Override
     public Mono<Void> clearCart() {
-        return cartItemRepository.deleteByUserId(userId);
+        return SecurityUtils.getUserId()
+                .flatMap(cartItemRepository::deleteByUserId);
     }
 
     public Flux<CartItem> getCartItems() {
+        return SecurityUtils.getUserId()
+                .flatMapMany(cartItemRepository::findByUserId);
+    }
+
+    public Flux<CartItem> getCartItemsOfUser(Long userId) {
         return cartItemRepository.findByUserId(userId);
     }
 
     @Override
     public Mono<Map<Long, CartItem>> getProductsInCartMap() {
-        return cartItemRepository.findByUserId(userId)
-                .collectMap(CartItem::getId, ci -> ci);
+        return SecurityUtils.getUserId()
+                .flatMapMany(cartItemRepository::findByUserId)
+                .collectMap(CartItem::getProductId, ci -> ci);
     }
 
     @Override
     public Mono<Integer> getSumOfCartItems() {
-        return cartItemRepository.findByUserId(userId)
+        return SecurityUtils.getUserId().flatMapMany(cartItemRepository::findByUserId)
                 .zipWith(findProductsOfCartMap())
                 .map(tuple -> {
                     var cartItem = tuple.getT1();
                     var productsMap = tuple.getT2();
-                    var product = productsMap.get(cartItem.getId());
+                    var product = productsMap.get(cartItem.getProductId());
 
                     return cartItem.getCount() * product.getPrice();
                 })
@@ -95,7 +105,7 @@ public class CartServiceImpl implements CartService {
     }
 
     public Mono<Map<Long, Product>> findProductsOfCartMap() {
-        return cartItemRepository.findByUserId(userId)
+        return SecurityUtils.getUserId().flatMapMany(cartItemRepository::findByUserId)
                 .map(CartItem::getProductId)
                 .collectList()
                 .map(productRepository::findAllById)
@@ -104,16 +114,41 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Mono<Long> getCountOfCartItems() {
-        return cartItemRepository.countByUserId(userId);
+        return SecurityUtils.getUserId().flatMap(cartItemRepository::countByUserId);
     }
 
     @Override
-    public Mono<CartItem> getCartItemById(Long id) {
-        return cartItemRepository.findById(id);
+    public Mono<CartItem> getCartItemByProductId(Long productId) {
+        return SecurityUtils.getUserId()
+                .flatMap(userId -> cartItemRepository.findByUserIdAndProductId(userId, productId));
     }
 
-    public Flux<CartItemResponseDTO> returnCartItems() {
-        return cartItemRepository.findByUserId(userId)
-                .map(cartMapper::map);
+    public Mono<List<CartItemResponseDTO>> returnCartItems() {
+        return SecurityUtils.getUserId()
+                .flatMapMany(cartItemRepository::findByUserId)
+                .collectList()
+                .zipWith(findProductsOfCartMap())
+                .map(tuple -> {
+                    var cartItems = tuple.getT1();
+                    var products = tuple.getT2();
+
+                    List<CartItemResponseDTO> result = new ArrayList<>();
+
+                    for (var cartItem : cartItems) {
+                        var cartResponseDto = cartMapper.map(cartItem);
+                        cartResponseDto.setProduct(productMapper.map(products.get(cartItem.getProductId())));
+                        result.add(cartResponseDto);
+                    }
+
+                    return result;
+                });
+    }
+
+    public Mono<Integer> cartSum() {
+        return returnCartItems()
+                .map(cartItems -> cartItems
+                        .stream()
+                        .map(ci -> ci.getCount() * ci.getProduct().getPrice())
+                        .reduce(0, Integer::sum));
     }
 }

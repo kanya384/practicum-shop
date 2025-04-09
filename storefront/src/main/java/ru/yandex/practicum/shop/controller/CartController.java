@@ -21,35 +21,35 @@ public class CartController {
     @GetMapping
     public Mono<String> getCartItems(Model model) {
         model.addAttribute("items", cartService.returnCartItems());
-        model.addAttribute("sum", cartService.returnCartItems()
-                .map(ci -> ci.getCount() * ci.getProduct().getPrice())
-                .reduce(0, Integer::sum));
+
+        model.addAttribute("sum", cartService.cartSum());
+
         model.addAttribute("balance", paymentsService.getBalance());
+
         return Mono.just("cart");
     }
 
     @PostMapping("/add/{productId}")
     public Mono<String> addProductToCart(@PathVariable("productId") Long productId) {
         return cartService.addItemToCart(productId)
-                .map(p -> "cart");
+                .map(p -> "redirect:/cart");
     }
 
     @PostMapping("/remove/{productId}")
     public Mono<String> removeProductFromCart(@PathVariable("productId") Long productId) {
-
         return cartService.removeItemFromCart(productId)
-                .map(p -> "cart");
+                .map(p -> "redirect:/products");
     }
 
     @PostMapping("/inc/{productId}")
     public Mono<String> increaseItemCount(@PathVariable("productId") Long productId) {
         return cartService.increaseItemCount(productId)
-                .map(p -> "cart");
+                .map(p -> "redirect:/cart");
     }
 
     @PostMapping("/dec/{productId}")
     public Mono<String> decreaseItemCount(@PathVariable("productId") Long productId) {
         return cartService.decreaseItemCount(productId)
-                .map(p -> "cart");
+                .map(p -> "redirect:/cart");
     }
 }

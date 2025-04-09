@@ -81,7 +81,7 @@ public class ProductControllerTest {
 
         when(productService.findById(1L))
                 .thenReturn(Mono.just(productResponseDTO));
-        when(cartService.getCartItemById(1L))
+        when(cartService.getCartItemByProductId(1L))
                 .thenReturn(Mono.empty());
 
         webTestClient.get()

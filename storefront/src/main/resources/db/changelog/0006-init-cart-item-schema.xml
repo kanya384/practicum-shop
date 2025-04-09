@@ -30,6 +30,11 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+        <addUniqueConstraint
+                columnNames="user_id, product_id"
+                constraintName="unique_cart_item"
+                tableName="cart_item"
+        />
         <rollback>
             <dropTable tableName="cart_item"/>
         </rollback>

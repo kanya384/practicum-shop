@@ -72,7 +72,6 @@
                                         <form th:action="@{${'/cart/dec/' + item.product.id}}"
                                               method="post"
                                               class="d-flex justify-content-end"
-                                              onclick="processFormWithPrevent(event)"
                                               style="max-width:250px">
                                             <button type="submit" class="btn btn-sm btn-outline-secondary">-</button>
                                         </form>
@@ -82,7 +81,6 @@
                                         <form th:action="@{${'/cart/inc/' + item.product.id}}"
                                               method="post"
                                               class="d-flex justify-content-end"
-                                              onclick="processFormWithPrevent(event)"
                                               style="max-width:250px">
                                             <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
                                         </form>
@@ -90,7 +88,6 @@
                                     <form th:action="@{${'/cart/remove/' + item.product.id}}"
                                           method="post"
                                           class="d-flex justify-content-end"
-                                          onclick="processFormWithPrevent(event)"
                                           style="max-width:250px">
                                         <button style="margin-left: 10px" type="submit"
                                                 class="items-in-cart-add btn btn-sm btn-outline-danger">

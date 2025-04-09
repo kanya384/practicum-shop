@@ -10,7 +10,18 @@
 <body>
 <div class="container">
     <div class="pt-3 d-flex justify-content-end">
-        <div class="display-flex">
+        <div th:if="${isAnonymous}">
+            <a href="/login" title="Войти" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     class="icon icon-tabler icons-tabler-outline icon-tabler-user">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/>
+                    <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/>
+                </svg>
+            </a>
+        </div>
+        <div sec:authorize="isAuthenticated()" class="display-flex">
             <a href="/orders" title="Заказы" class="btn btn-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -118,11 +129,10 @@
                         <a th:href="@{${'/products/' + product.id}}">
                             <p class="card-text title" th:text="${product.title}"></p>
                         </a>
-                        <div class="items-in-cart d-flex justify-content-end">
+                        <div sec:authorize="isAuthenticated()" class="items-in-cart d-flex justify-content-end">
                             <form th:if="${mapProductInCart.get(product.id) == null}"
                                   th:action="@{${'/cart/add/' + product.id}}"
                                   method="post"
-                                  onsubmit="processFormWithPrevent(event)"
                                   class="d-flex justify-content-end"
                                   style="max-width:250px">
                                 <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.sort)}"/>
@@ -149,7 +159,6 @@
                                 <form th:action="@{${'/cart/dec/' + product.id}}"
                                       method="post"
                                       class="d-flex justify-content-end"
-                                      onclick="processFormWithPrevent(event)"
                                       style="max-width:250px">
                                     <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.sort)}"/>
                                     <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.search)}"/>
@@ -161,7 +170,6 @@
                                         th:text="${mapProductInCart.get(product.id).count}"></button>
                                 <form th:action="@{${'/cart/inc/' + product.id}}"
                                       method="post"
-                                      onclick="processFormWithPrevent(event)"
                                       style="max-width:250px">
                                     <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.sort)}"/>
                                     <input type="hidden" name="sort" th:value="${#strings.toLowerCase(params.search)}"/>

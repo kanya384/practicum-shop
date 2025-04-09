@@ -6,7 +6,6 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.shop.dto.cart.CartItemResponseDTO;
 import ru.yandex.practicum.shop.dto.product.ProductResponseDTO;
@@ -14,6 +13,8 @@ import ru.yandex.practicum.shop.exception.AlreadyExistsInCartException;
 import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
 import ru.yandex.practicum.shop.service.CartService;
 import ru.yandex.practicum.shop.service.PaymentsService;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -41,9 +42,9 @@ public class CartControllerTest {
                 .build();
 
         when(cartService.returnCartItems())
-                .thenReturn(Flux.just(new CartItemResponseDTO(productResponseDTO, 1)));
+                .thenReturn(Mono.just(List.of(new CartItemResponseDTO(productResponseDTO, 1))));
         when(cartService.returnCartItems())
-                .thenReturn(Flux.just(new CartItemResponseDTO(productResponseDTO, 1)));
+                .thenReturn(Mono.just(List.of(new CartItemResponseDTO(productResponseDTO, 1))));
 
         webTestClient.get()
                 .uri("/cart")

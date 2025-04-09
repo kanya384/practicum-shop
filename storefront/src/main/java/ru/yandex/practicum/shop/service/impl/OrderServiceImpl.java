@@ -10,9 +10,7 @@ import ru.yandex.practicum.shop.dto.order.OrderItemResponseDTO;
 import ru.yandex.practicum.shop.dto.order.OrderResponseDTO;
 import ru.yandex.practicum.shop.dto.product.ProductResponseDTO;
 import ru.yandex.practicum.shop.exception.NoProductsInOrderException;
-import ru.yandex.practicum.shop.exception.NotEnoughMoneyException;
 import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
-import ru.yandex.practicum.shop.mapper.OrderMapper;
 import ru.yandex.practicum.shop.mapper.ProductMapper;
 import ru.yandex.practicum.shop.model.Order;
 import ru.yandex.practicum.shop.model.OrderItem;
@@ -23,11 +21,11 @@ import ru.yandex.practicum.shop.repository.ProductRepository;
 import ru.yandex.practicum.shop.service.CartService;
 import ru.yandex.practicum.shop.service.OrderService;
 import ru.yandex.practicum.shop.service.PaymentsService;
+import ru.yandex.practicum.shop.utils.SecurityUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,13 +33,9 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
-    private final OrderMapper orderMapper;
     private final ProductMapper productMapper;
     private final CartService cartService;
     private final PaymentsService paymentsService;
-
-    //TODO: get user_id from Authorization
-    private final UUID userId = UUID.randomUUID();
 
     @Transactional
     @Override
@@ -53,21 +47,12 @@ public class OrderServiceImpl implements OrderService {
                         return Mono.error(new NoProductsInOrderException("ошибка сохранения заказа"));
                     }
 
-                    return Mono.empty();
+                    return Mono.just(isEmpty);
                 })
-                .flatMap(c -> paymentsService.getBalance())
-                .zipWith(cartService.getSumOfCartItems())
-                .flatMap(b -> {
-                    var balance = b.getT1();
-                    var orderSum = b.getT2();
-
-                    if (orderSum > balance) {
-                        return Mono.error(new NotEnoughMoneyException("Недостаточно средств для совершения заказа"));
-                    }
-                    return Mono.just(orderSum);
-                })
+                .flatMap(c -> cartService.getSumOfCartItems())
                 .flatMap(paymentsService::processPayment)
-                .flatMap(b -> orderRepository.save(new Order()))
+                .flatMap(p -> SecurityUtils.getUserId())
+                .flatMap(userId -> orderRepository.save(new Order(userId)))
                 .switchIfEmpty(Mono.error(new InternalError("ошибка сохранения заказа")))
                 .flatMap(o -> storeOrderItems(o.getId()))
                 .flatMap(this::findById);
@@ -101,7 +86,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     private Mono<Long> storeOrderItems(Long orderId) {
-        return cartService.getCartItems()
+        return SecurityUtils.getUserId()
+                .flatMapMany(cartService::getCartItemsOfUser)
                 .map(ci -> {
                     OrderItem orderItem = new OrderItem();
                     orderItem.setProductId(ci.getProductId());
@@ -110,10 +96,9 @@ public class OrderServiceImpl implements OrderService {
                     return orderItem;
                 })
                 .collectList()
-                .map(orderItemRepository::saveAll)
-                .doOnNext(c -> cartService.clearCart().block())
-                .flatMap(Flux::collectList)
-                .map(l -> l.getFirst().getOrderId());
+                .flatMapMany(orderItemRepository::saveAll)
+                .collectList()
+                .flatMap(c -> cartService.clearCart().thenReturn(orderId));
     }
 
     private Mono<List<OrderItemResponseDTO>> findOrderItemsByOrderId(Long orderId) {

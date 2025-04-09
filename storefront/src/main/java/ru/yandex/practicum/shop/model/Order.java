@@ -17,6 +17,10 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Table(name = "orders")
 public class Order {
+    public Order(Long userId) {
+        this.userId = userId;
+    }
+
     @Id
     private Long id;
 
