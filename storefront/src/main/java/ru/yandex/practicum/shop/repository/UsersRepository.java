@@ -6,6 +6,6 @@ import reactor.core.publisher.Mono;
 import ru.yandex.practicum.shop.model.User;
 
 @Repository
-public interface UserRepository extends R2dbcRepository<User, Long> {
+public interface UsersRepository extends R2dbcRepository<User, Long> {
     Mono<User> findByLogin(String login);
 }

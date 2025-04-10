@@ -26,8 +26,7 @@ public class CartController {
 
         model.addAttribute("sum", cartService.cartSum());
 
-        var userId = ((User) authentication.getPrincipal()).getId();
-        model.addAttribute("balance", paymentsService.getBalance(userId));
+        model.addAttribute("balance", paymentsService.getBalance());
 
         return Mono.just("cart");
     }
@@ -36,7 +35,7 @@ public class CartController {
     public Mono<String> putMoneyToBalance(Model model, Authentication authentication) {
         var userId = ((User) authentication.getPrincipal()).getId();
 
-        return paymentsService.put5kToBalance(userId)
+        return paymentsService.put5kToBalance()
                 .flatMap(p -> Mono.just("redirect:/cart"));
     }
 

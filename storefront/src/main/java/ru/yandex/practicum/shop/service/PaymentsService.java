@@ -3,9 +3,9 @@ package ru.yandex.practicum.shop.service;
 import reactor.core.publisher.Mono;
 
 public interface PaymentsService {
-    Mono<Integer> put5kToBalance(Long userId);
+    Mono<Integer> put5kToBalance();
 
-    Mono<Integer> getBalance(Long userId);
+    Mono<Integer> getBalance();
 
-    Mono<Integer> processPayment(Long userId, int orderSum);
+    Mono<Integer> processPayment(int orderSum);
 }

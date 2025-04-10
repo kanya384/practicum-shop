@@ -23,23 +23,19 @@ spring:
       redis:
         time-to-live: PT1M
   security:
-    security:
-      enable-csrf: true
-#    client:
-#      provider:
-#        keycloak:
-#          authorization-uri: http://localhost:8080/realms/master/protocol/openid-connect/auth
-#          token-uri: http://localhost:8080/realms/master/protocol/openid-connect/token
-#          user-info-uri: http://localhost:8080/realms/master/protocol/openid-connect/userinfo
-#          user-name-attribute: sub
-#          jwk-set-uri: http://localhost:8080/realms/master/protocol/openid-connect/certs
-#      registration:
-#        yandex: # Описание клиента OAuth2
-#          provider: keycloak
-#          authorizationGrantType: authorization_code
-#          client-id: storefront
-#          client-secret: B3ng9yo1mXqEgTc2V05dbhkmpoLPL3Jb
-#          scope: openid, profile, email
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8080/realms/master
+        registration:
+          shop:
+            provider: keycloak
+            authorizationGrantType: client_credentials
+            client-id: shop
+            client-secret: r8wKFBPrUHJqwAHdgzSb7fmE8IfbcmNe
+            scope: profile
+            clientAuthenticationMethod: client_secret_post
 logging:
   level:
     io.r2dbc.postgresql.QUERY: DEBUG

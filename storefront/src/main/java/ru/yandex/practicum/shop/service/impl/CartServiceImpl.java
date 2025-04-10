@@ -27,24 +27,25 @@ public class CartServiceImpl implements CartService {
     private final ProductRepository productRepository;
     private final CartMapper cartMapper;
     private final ProductMapper productMapper;
+    private final SecurityUtils securityUtils;
 
 
     public synchronized Mono<Long> addItemToCart(Long productId) {
-        return SecurityUtils.getUserId()
+        return securityUtils.getUserId()
                 .flatMap((userId) -> cartItemRepository.save(new CartItem(userId, productId, 1)))
                 .map(p -> productId);
     }
 
     public Mono<Long> removeItemFromCart(Long productId) {
 
-        return SecurityUtils.getUserId()
+        return securityUtils.getUserId()
                 .flatMap(userId -> cartItemRepository.findByUserIdAndProductId(userId, productId))
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("Продукт", productId)))
                 .flatMap(cartItem -> cartItemRepository.deleteById(cartItem.getId()).thenReturn(productId));
     }
 
     public synchronized Mono<Long> increaseItemCount(Long productId) {
-        return SecurityUtils.getUserId()
+        return securityUtils.getUserId()
                 .flatMap(userId -> cartItemRepository.findByUserIdAndProductId(userId, productId))
                 .switchIfEmpty(Mono.error(new NoItemInCartException(String.format("Продукта c id = %d нет в корзине", productId))))
                 .doOnNext(CartItem::inc)
@@ -53,7 +54,7 @@ public class CartServiceImpl implements CartService {
     }
 
     public synchronized Mono<Long> decreaseItemCount(Long productId) {
-        return SecurityUtils.getUserId()
+        return securityUtils.getUserId()
                 .flatMap(userId -> cartItemRepository.findByUserIdAndProductId(userId, productId))
                 .switchIfEmpty(Mono.error(new NoItemInCartException(String.format("Продукта c id = %d нет в корзине", productId))))
                 .doOnNext(CartItem::dec)
@@ -70,12 +71,12 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Mono<Void> clearCart() {
-        return SecurityUtils.getUserId()
+        return securityUtils.getUserId()
                 .flatMap(cartItemRepository::deleteByUserId);
     }
 
     public Flux<CartItem> getCartItems() {
-        return SecurityUtils.getUserId()
+        return securityUtils.getUserId()
                 .flatMapMany(cartItemRepository::findByUserId);
     }
 
@@ -85,14 +86,14 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Mono<Map<Long, CartItem>> getProductsInCartMap() {
-        return SecurityUtils.getUserId()
+        return securityUtils.getUserId()
                 .flatMapMany(cartItemRepository::findByUserId)
                 .collectMap(CartItem::getProductId, ci -> ci);
     }
 
     @Override
     public Mono<Integer> getSumOfCartItems() {
-        return SecurityUtils.getUserId().flatMapMany(cartItemRepository::findByUserId)
+        return securityUtils.getUserId().flatMapMany(cartItemRepository::findByUserId)
                 .zipWith(findProductsOfCartMap())
                 .map(tuple -> {
                     var cartItem = tuple.getT1();
@@ -105,7 +106,7 @@ public class CartServiceImpl implements CartService {
     }
 
     public Mono<Map<Long, Product>> findProductsOfCartMap() {
-        return SecurityUtils.getUserId().flatMapMany(cartItemRepository::findByUserId)
+        return securityUtils.getUserId().flatMapMany(cartItemRepository::findByUserId)
                 .map(CartItem::getProductId)
                 .collectList()
                 .map(productRepository::findAllById)
@@ -114,17 +115,18 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Mono<Long> getCountOfCartItems() {
-        return SecurityUtils.getUserId().flatMap(cartItemRepository::countByUserId);
+        return securityUtils.getUserId()
+                .flatMap(cartItemRepository::countByUserId);
     }
 
     @Override
     public Mono<CartItem> getCartItemByProductId(Long productId) {
-        return SecurityUtils.getUserId()
+        return securityUtils.getUserId()
                 .flatMap(userId -> cartItemRepository.findByUserIdAndProductId(userId, productId));
     }
 
     public Mono<List<CartItemResponseDTO>> returnCartItems() {
-        return SecurityUtils.getUserId()
+        return securityUtils.getUserId()
                 .flatMapMany(cartItemRepository::findByUserId)
                 .collectList()
                 .zipWith(findProductsOfCartMap())

@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
@@ -32,6 +34,7 @@ public class OrderControllerTest {
 
 
     @Test
+    @WithMockUser
     void placeOrder_shouldPlaceOrder() {
         ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
                 .id(1L)
@@ -56,7 +59,9 @@ public class OrderControllerTest {
         when(orderService.placeOrder())
                 .thenReturn(Mono.just(orderResponseDTO));
 
-        webTestClient.post()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.csrf())
+                .post()
                 .uri("/orders")
                 .exchange()
                 .expectStatus().isOk()
@@ -71,11 +76,14 @@ public class OrderControllerTest {
     }
 
     @Test
+    @WithMockUser
     void placeOrder_shouldReturnErrorIfNoItemsInOrder() {
         when(orderService.placeOrder())
                 .thenThrow(new NoProductsInOrderException(""));
 
-        webTestClient.post()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.csrf())
+                .post()
                 .uri("/orders")
                 .exchange()
                 .expectStatus().isBadRequest()
@@ -87,7 +95,8 @@ public class OrderControllerTest {
     }
 
     @Test
-    void findAll_shouldReturnOrdersList() {
+    @WithMockUser
+    void findOrdersOfUser_shouldReturnOrdersList() {
         ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
                 .id(1L)
                 .title("title")
@@ -108,7 +117,7 @@ public class OrderControllerTest {
                 .createdAt(LocalDate.now())
                 .build();
 
-        when(orderService.findAll())
+        when(orderService.findOrdersOfUser())
                 .thenReturn(Flux.just(orderResponseDTO));
 
         webTestClient.get()
@@ -124,6 +133,7 @@ public class OrderControllerTest {
 
 
     @Test
+    @WithMockUser
     void findById_shouldReturnOrderById() {
         ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
                 .id(1L)
@@ -161,6 +171,7 @@ public class OrderControllerTest {
     }
 
     @Test
+    @WithMockUser
     void findById_shouldReturn404IfOrderNotExists() {
         when(orderService.findById(anyLong()))
                 .thenThrow(new ResourceNotFoundException("Заказ", -1L));

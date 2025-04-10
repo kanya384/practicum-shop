@@ -2,6 +2,7 @@ package ru.yandex.practicum.shop.model;
 
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,6 +20,7 @@ import java.util.List;
 @Builder
 @Table(name = "users")
 public class User implements UserDetails {
+    @Id
     private Long id;
     private String login;
     private String password;

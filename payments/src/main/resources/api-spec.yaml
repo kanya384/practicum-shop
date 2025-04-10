@@ -6,6 +6,8 @@ info:
 paths:
   /payments/create/{userId}:
     post:
+      security:
+        - Bearer: [ ]
       tags:
         - payments
       parameters:
@@ -26,6 +28,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
   /payments/balance/{userId}:
     get:
+      security:
+        - Bearer: [ ]
       tags:
         - payments
       parameters:
@@ -46,6 +50,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
   /payments/process/{userId}:
     post:
+      security:
+        - Bearer: [ ]
       tags:
         - payments
       parameters:
@@ -78,6 +84,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
   /payments/deposit/{userId}:
     post:
+      security:
+        - Bearer: [ ]
       tags:
         - payments
       parameters:
@@ -107,6 +115,13 @@ tags:
     description: Платежные операции
 
 components:
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
+      description: >-
+        Enter the token with the `Bearer: ` prefix, e.g. "Bearer abcde12345".
   parameters:
     UserId:
       name: userId

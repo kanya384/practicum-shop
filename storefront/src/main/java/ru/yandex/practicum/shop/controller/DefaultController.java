@@ -6,6 +6,7 @@ import reactor.core.publisher.Mono;
 
 @Controller
 public class DefaultController {
+
     @GetMapping("/")
     public Mono<String> mainPage() {
         return Mono.just("redirect:/products");

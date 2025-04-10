@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import ru.yandex.practicum.payments.dto.DepositMoneyRequest;
 import ru.yandex.practicum.payments.dto.ProcessPaymentRequest;
@@ -30,17 +31,23 @@ public class PaymentControllerIntegrationTest extends AbstractTestContainer {
         billingAccountRepository.deleteAll()
                 .block();
 
-        var billingAccount = BillingAccount.builder()
-                .money(100)
-                .build();
 
-        billingAccountRepository.save(billingAccount).block();
     }
 
     @Test
     void paymentsBalanceGet_shouldReturnBalance() {
-        webTestClient.get()
-                .uri("/payments/balance")
+        var billingAccount = BillingAccount.builder()
+                .userId(1L)
+                .money(100)
+                .build();
+
+        billingAccountRepository.save(billingAccount)
+                .block();
+
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.mockUser())
+                .get()
+                .uri("/payments/balance/{userId}", billingAccount.getUserId())
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -50,11 +57,21 @@ public class PaymentControllerIntegrationTest extends AbstractTestContainer {
 
     @Test
     void paymentsProcessPost_shouldProcessPayment() {
+        var billingAccount = BillingAccount.builder()
+                .userId(1L)
+                .money(100)
+                .build();
+
+        billingAccountRepository.save(billingAccount)
+                .block();
+
         var request = new ProcessPaymentRequest();
         request.setOrderSum(50);
 
-        webTestClient.post()
-                .uri("/payments/process")
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.mockUser())
+                .post()
+                .uri("/payments/process/{id}", billingAccount.getUserId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
@@ -66,11 +83,21 @@ public class PaymentControllerIntegrationTest extends AbstractTestContainer {
 
     @Test
     void paymentsProcessPost_shouldReturnNotEnoughMoney() {
+        var billingAccount = BillingAccount.builder()
+                .userId(1L)
+                .money(100)
+                .build();
+
+        billingAccountRepository.save(billingAccount)
+                .block();
+
         var request = new ProcessPaymentRequest();
         request.setOrderSum(500);
 
-        webTestClient.post()
-                .uri("/payments/process")
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.mockUser())
+                .post()
+                .uri("/payments/process/{id}", billingAccount.getUserId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
@@ -82,11 +109,21 @@ public class PaymentControllerIntegrationTest extends AbstractTestContainer {
 
     @Test
     void paymentsDepositPost_shouldAddMoneyToBalance() {
+        var billingAccount = BillingAccount.builder()
+                .userId(1L)
+                .money(100)
+                .build();
+
+        billingAccountRepository.save(billingAccount)
+                .block();
+
         var request = new DepositMoneyRequest();
         request.setMoney(1500);
 
-        webTestClient.post()
-                .uri("/payments/deposit")
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.mockUser())
+                .post()
+                .uri("/payments/deposit/{id}", billingAccount.getUserId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()

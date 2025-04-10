@@ -36,26 +36,29 @@ public class OrderServiceImpl implements OrderService {
     private final ProductMapper productMapper;
     private final CartService cartService;
     private final PaymentsService paymentsService;
+    private final SecurityUtils securityUtils;
 
     @Transactional
     @Override
     public Mono<OrderResponseDTO> placeOrder() {
         return cartService.getCountOfCartItems()
+                .switchIfEmpty(Mono.error(new NoProductsInOrderException("ошибка сохранения заказа")))
                 .map(count -> count == 0)
                 .flatMap(isEmpty -> {
                     if (isEmpty) {
-                        return Mono.error(new NoProductsInOrderException("ошибка сохранения заказа"));
+                        return Mono.error(
+                                new NoProductsInOrderException("ошибка сохранения заказа, нет продуктов в корзине"));
                     }
 
                     return Mono.just(isEmpty);
                 })
                 .flatMap(c -> cartService.getSumOfCartItems())
-                .zipWith(SecurityUtils.getUserId())
+                .zipWith(securityUtils.getUserId())
                 .flatMap(tuple -> {
                     var orderSum = tuple.getT1();
                     var userId = tuple.getT2();
 
-                    return paymentsService.processPayment(userId, orderSum)
+                    return paymentsService.processPayment(orderSum)
                             .thenReturn(userId);
                 })
                 .flatMap(userId -> orderRepository.save(new Order(userId)))
@@ -83,7 +86,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Flux<OrderResponseDTO> findOrdersOfUser() {
-        return SecurityUtils.getUserId()
+        return securityUtils.getUserId()
                 .flatMapMany(orderRepository::findByUserId)
                 .map(o -> OrderResponseDTO.builder()
                         .id(o.getId())
@@ -93,7 +96,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     private Mono<Long> storeOrderItems(Long orderId) {
-        return SecurityUtils.getUserId()
+        return securityUtils.getUserId()
                 .flatMapMany(cartService::getCartItemsOfUser)
                 .map(ci -> {
                     OrderItem orderItem = new OrderItem();

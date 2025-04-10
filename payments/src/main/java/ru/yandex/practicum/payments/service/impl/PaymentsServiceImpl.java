@@ -20,7 +20,7 @@ public class PaymentsServiceImpl implements PaymentService {
     private final BillingAccountRepository billingAccountRepository;
 
     @Override
-    public Mono<BalanceResponse> createAccountAndPutMoneyToBalance(long userId) {
+    public Mono<BalanceResponse> createAccountAndPutMoneyToBalance(Long userId) {
         return billingAccountRepository.findByUserId(userId)
                 .switchIfEmpty(billingAccountRepository.save(new BillingAccount(userId)))
                 .doOnNext(billingAccount -> billingAccount.setMoney(billingAccount.getMoney() + 5000))
@@ -29,7 +29,7 @@ public class PaymentsServiceImpl implements PaymentService {
     }
 
     @Override
-    public Mono<BalanceResponse> getBalance(long userId) {
+    public Mono<BalanceResponse> getBalance(Long userId) {
         return billingAccountRepository.findByUserId(userId)
                 .switchIfEmpty(billingAccountRepository.save(new BillingAccount(userId)))
                 .map(this::map);
@@ -37,7 +37,7 @@ public class PaymentsServiceImpl implements PaymentService {
 
 
     @Override
-    public Mono<BalanceResponse> processPayment(long userId, ProcessPaymentRequest request) {
+    public Mono<BalanceResponse> processPayment(Long userId, ProcessPaymentRequest request) {
         return billingAccountRepository.findByUserId(userId)
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("Не найден платежный аккаунт")))
                 .doOnNext(ba -> ba.setMoney(ba.getMoney() - request.getOrderSum()))
@@ -51,7 +51,7 @@ public class PaymentsServiceImpl implements PaymentService {
     }
 
     @Override
-    public Mono<BalanceResponse> depositMoney(long userId, DepositMoneyRequest request) {
+    public Mono<BalanceResponse> depositMoney(Long userId, DepositMoneyRequest request) {
         return billingAccountRepository.findByUserId(userId)
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("Не найден платежный аккаунт")))
                 .doOnNext(ba -> ba.setMoney(ba.getMoney() + request.getMoney()))

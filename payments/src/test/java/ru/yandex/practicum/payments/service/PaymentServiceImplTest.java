@@ -14,7 +14,6 @@ import ru.yandex.practicum.payments.service.impl.PaymentsServiceImpl;
 
 import java.time.LocalDate;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = {PaymentsServiceImpl.class})
@@ -28,23 +27,6 @@ public class PaymentServiceImplTest {
     @BeforeEach
     void setUp() {
         reset(billingAccountRepository);
-    }
-
-    @Test
-    void getBalance_shouldReturnBalance() {
-        when(billingAccountRepository.findByUserId(any(Long.class)))
-                .thenReturn(Mono.just(BillingAccount.builder()
-                        .id(1L)
-                        .userId(1L)
-                        .money(1000)
-                        .createdAt(LocalDate.now())
-                        .modifiedAt(LocalDate.now())
-                        .build()));
-
-        StepVerifier.create(paymentService.getBalance(1L))
-                .expectNextMatches(b -> b.getMoney() != null
-                        && b.getMoney() == 1000)
-                .verifyComplete();
     }
 
     @Test

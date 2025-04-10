@@ -9,13 +9,13 @@ import ru.yandex.practicum.shop.dto.user.CreateUserDTO;
 import ru.yandex.practicum.shop.dto.user.UserResponseDTO;
 import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
 import ru.yandex.practicum.shop.mapper.UserMapper;
-import ru.yandex.practicum.shop.repository.UserRepository;
+import ru.yandex.practicum.shop.repository.UsersRepository;
 import ru.yandex.practicum.shop.service.UserService;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService, ReactiveUserDetailsService {
-    private final UserRepository userRepository;
+    private final UsersRepository userRepository;
     private final UserMapper userMapper;
 
     @Override

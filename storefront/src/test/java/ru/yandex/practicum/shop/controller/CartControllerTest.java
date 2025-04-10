@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -13,6 +15,7 @@ import ru.yandex.practicum.shop.exception.AlreadyExistsInCartException;
 import ru.yandex.practicum.shop.exception.ResourceNotFoundException;
 import ru.yandex.practicum.shop.service.CartService;
 import ru.yandex.practicum.shop.service.PaymentsService;
+import ru.yandex.practicum.shop.utils.SecurityUtils;
 
 import java.util.List;
 
@@ -31,7 +34,11 @@ public class CartControllerTest {
     @MockitoBean
     PaymentsService paymentsService;
 
+    @MockitoBean
+    SecurityUtils securityUtils;
+
     @Test
+    @WithMockUser
     void getCartItems_shouldReturnProductsList() {
         ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
                 .id(1L)
@@ -43,8 +50,8 @@ public class CartControllerTest {
 
         when(cartService.returnCartItems())
                 .thenReturn(Mono.just(List.of(new CartItemResponseDTO(productResponseDTO, 1))));
-        when(cartService.returnCartItems())
-                .thenReturn(Mono.just(List.of(new CartItemResponseDTO(productResponseDTO, 1))));
+        when(cartService.cartSum())
+                .thenReturn(Mono.just(100));
 
         webTestClient.get()
                 .uri("/cart")
@@ -57,19 +64,22 @@ public class CartControllerTest {
                     assertTrue(body.contains("class=\"cart-item card"));
                 });
 
-        verify(cartService, times(2)).returnCartItems();
+        verify(cartService, times(1)).returnCartItems();
+        verify(cartService, times(1)).cartSum();
     }
 
     @Test
+    @WithMockUser
     void addProductToCart_shouldAddProductToCart() {
         when(cartService.addItemToCart(anyLong()))
                 .thenReturn(Mono.just(3L));
 
-        webTestClient.post()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.csrf())
+                .post()
                 .uri("/cart/add/{id}", 3L)
                 .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_HTML);
+                .expectStatus().is3xxRedirection();
 
 
         verify(cartService, times(1))
@@ -78,12 +88,15 @@ public class CartControllerTest {
 
 
     @Test
+    @WithMockUser
     void addProductToCart_shouldReturnErrorIfProductAlreadyExistingInCart() {
         doThrow(new AlreadyExistsInCartException(""))
                 .when(cartService)
                 .addItemToCart(anyLong());
 
-        webTestClient.post()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.csrf())
+                .post()
                 .uri("/cart/add/{id}", 3L)
                 .exchange()
                 .expectStatus().isBadRequest()
@@ -99,15 +112,17 @@ public class CartControllerTest {
     }
 
     @Test
+    @WithMockUser
     void removeProductFromCart_shouldRemoveProductFromCart() {
         when(cartService.removeItemFromCart(anyLong()))
                 .thenReturn(Mono.just(3L));
 
-        webTestClient.post()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.csrf())
+                .post()
                 .uri("/cart/remove/{id}", 3L)
                 .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_HTML);
+                .expectStatus().is3xxRedirection();
 
 
         verify(cartService, times(1))
@@ -115,10 +130,13 @@ public class CartControllerTest {
     }
 
     @Test
+    @WithMockUser
     void removeProductFromCart_shouldReturnErrorIfProductNotExistingInCart() {
         doThrow(new ResourceNotFoundException("Продутк", 3L)).when(cartService).removeItemFromCart(anyLong());
 
-        webTestClient.post()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.csrf())
+                .post()
                 .uri("/cart/remove/{id}", 3L)
                 .exchange()
                 .expectStatus().isNotFound()
@@ -131,27 +149,32 @@ public class CartControllerTest {
     }
 
     @Test
+    @WithMockUser
     void increaseItemCount_shouldIncreaseItemCount() {
         when(cartService.increaseItemCount(anyLong()))
                 .thenReturn(Mono.just(3L));
 
-        webTestClient.post()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.csrf())
+                .post()
                 .uri("/cart/inc/{id}", 3L)
                 .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_HTML);
+                .expectStatus().is3xxRedirection();
 
         verify(cartService, times(1))
                 .increaseItemCount(any());
     }
 
     @Test
+    @WithMockUser
     void increaseItemCount_shouldReturnNotFoundIfNoItemInCart() {
         doThrow(new ResourceNotFoundException("Продутк", 3L))
                 .when(cartService)
                 .increaseItemCount(anyLong());
 
-        webTestClient.post()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.csrf())
+                .post()
                 .uri("/cart/inc/{id}", 3L)
                 .exchange()
                 .expectStatus().isNotFound()
@@ -163,27 +186,32 @@ public class CartControllerTest {
     }
 
     @Test
+    @WithMockUser
     void decreaseItemCount_shouldIncreaseItemCount() {
         when(cartService.decreaseItemCount(anyLong()))
                 .thenReturn(Mono.just(3L));
 
-        webTestClient.post()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.csrf())
+                .post()
                 .uri("/cart/dec/{id}", 3L)
                 .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_HTML);
+                .expectStatus().is3xxRedirection();
 
         verify(cartService, times(1))
                 .decreaseItemCount(any());
     }
 
     @Test
+    @WithMockUser
     void decreaseItemCount_shouldReturnNotFoundIfNoItemInCart() {
         doThrow(new ResourceNotFoundException("Продутк", 3L))
                 .when(cartService)
                 .decreaseItemCount(anyLong());
 
-        webTestClient.post()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.csrf())
+                .post()
                 .uri("/cart/dec/{id}", 3L)
                 .exchange()
                 .expectStatus().isNotFound()

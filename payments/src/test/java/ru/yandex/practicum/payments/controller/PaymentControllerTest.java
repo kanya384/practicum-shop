@@ -4,9 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.payments.configuration.SecurityConfig;
 import ru.yandex.practicum.payments.dto.BalanceResponse;
 import ru.yandex.practicum.payments.dto.DepositMoneyRequest;
 import ru.yandex.practicum.payments.dto.ProcessPaymentRequest;
@@ -15,7 +18,7 @@ import ru.yandex.practicum.payments.service.PaymentService;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@WebFluxTest(PaymentController.class)
+@WebFluxTest({PaymentController.class, SecurityConfig.class})
 public class PaymentControllerTest {
     @Autowired
     private WebTestClient webTestClient;
@@ -24,6 +27,7 @@ public class PaymentControllerTest {
     private PaymentService paymentService;
 
     @Test
+    @WithMockUser
     void paymentsBalanceGet_shouldReturnBalance() {
         var balanceResponse = new BalanceResponse();
         balanceResponse.setMoney(100);
@@ -31,7 +35,9 @@ public class PaymentControllerTest {
         when(paymentService.getBalance(any(Long.class)))
                 .thenReturn(Mono.just(balanceResponse));
 
-        webTestClient.get()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.csrf())
+                .get()
                 .uri("/payments/balance/{id}", 1L)
                 .exchange()
                 .expectStatus().isOk()
@@ -41,6 +47,7 @@ public class PaymentControllerTest {
     }
 
     @Test
+    @WithMockUser
     void paymentsProcessPost_shouldProcessPayment() {
         var balanceResponse = new BalanceResponse();
         balanceResponse.setMoney(500);
@@ -51,7 +58,8 @@ public class PaymentControllerTest {
         when(paymentService.processPayment(any(Long.class), any()))
                 .thenReturn(Mono.just(balanceResponse));
 
-        webTestClient.post()
+        webTestClient
+                .post()
                 .uri("/payments/process/{id}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -66,6 +74,7 @@ public class PaymentControllerTest {
     }
 
     @Test
+    @WithMockUser
     void paymentsDepositPost_shouldAddMoneyToBalance() {
         var balanceResponse = new BalanceResponse();
         balanceResponse.setMoney(2000);
