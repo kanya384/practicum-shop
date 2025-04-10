@@ -7,5 +7,5 @@ import ru.yandex.practicum.payments.model.BillingAccount;
 
 @Repository
 public interface BillingAccountRepository extends R2dbcRepository<BillingAccount, Long> {
-    Mono<BillingAccount> findFirstByOrderByCreatedAt();
+    Mono<BillingAccount> findByUserId(long userId);
 }

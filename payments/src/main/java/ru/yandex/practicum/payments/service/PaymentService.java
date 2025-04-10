@@ -6,9 +6,11 @@ import ru.yandex.practicum.payments.dto.DepositMoneyRequest;
 import ru.yandex.practicum.payments.dto.ProcessPaymentRequest;
 
 public interface PaymentService {
-    Mono<BalanceResponse> getBalance();
+    Mono<BalanceResponse> createAccountAndPutMoneyToBalance(long userId);
 
-    Mono<BalanceResponse> processPayment(ProcessPaymentRequest request);
+    Mono<BalanceResponse> getBalance(long userId);
 
-    Mono<BalanceResponse> depositMoney(DepositMoneyRequest request);
+    Mono<BalanceResponse> processPayment(long userId, ProcessPaymentRequest request);
+
+    Mono<BalanceResponse> depositMoney(long userId, DepositMoneyRequest request);
 }

@@ -4,10 +4,32 @@ info:
   description: API сервиса платежей
   version: 1.0.0
 paths:
-  /payments/balance:
+  /payments/create/{userId}:
+    post:
+      tags:
+        - payments
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      summary: Кладет на счет 5000 (если счета нет, то он создается)
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+        '500':
+          description: Внутреняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /payments/balance/{userId}:
     get:
       tags:
         - payments
+      parameters:
+        - $ref: '#/components/parameters/UserId'
       summary: Получить баланс на счете
       responses:
         '200':
@@ -22,10 +44,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /payments/process:
+  /payments/process/{userId}:
     post:
       tags:
         - payments
+      parameters:
+        - $ref: '#/components/parameters/UserId'
       summary: Оплатить заказ
       requestBody:
         required: true
@@ -52,10 +76,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /payments/deposit:
+  /payments/deposit/{userId}:
     post:
       tags:
         - payments
+      parameters:
+        - $ref: '#/components/parameters/UserId'
       summary: Положить деньги на счет
       requestBody:
         required: true
@@ -79,7 +105,17 @@ paths:
 tags:
   - name: payments
     description: Платежные операции
+
 components:
+  parameters:
+    UserId:
+      name: userId
+      in: path
+      required: true
+      description: Идентификатор пользователя
+      schema:
+        type: integer
+        format: int64
   schemas:
     BalanceResponse:
       description: остаток на счете

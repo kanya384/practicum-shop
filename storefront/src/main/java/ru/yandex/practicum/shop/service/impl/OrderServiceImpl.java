@@ -50,8 +50,14 @@ public class OrderServiceImpl implements OrderService {
                     return Mono.just(isEmpty);
                 })
                 .flatMap(c -> cartService.getSumOfCartItems())
-                .flatMap(paymentsService::processPayment)
-                .flatMap(p -> SecurityUtils.getUserId())
+                .zipWith(SecurityUtils.getUserId())
+                .flatMap(tuple -> {
+                    var orderSum = tuple.getT1();
+                    var userId = tuple.getT2();
+
+                    return paymentsService.processPayment(userId, orderSum)
+                            .thenReturn(userId);
+                })
                 .flatMap(userId -> orderRepository.save(new Order(userId)))
                 .switchIfEmpty(Mono.error(new InternalError("ошибка сохранения заказа")))
                 .flatMap(o -> storeOrderItems(o.getId()))
@@ -76,8 +82,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Flux<OrderResponseDTO> findAll() {
-        return orderRepository.findAll()
+    public Flux<OrderResponseDTO> findOrdersOfUser() {
+        return SecurityUtils.getUserId()
+                .flatMapMany(orderRepository::findByUserId)
                 .map(o -> OrderResponseDTO.builder()
                         .id(o.getId())
                         .createdAt(o.getCreatedAt())

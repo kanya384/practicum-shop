@@ -32,15 +32,16 @@ public class PaymentServiceImplTest {
 
     @Test
     void getBalance_shouldReturnBalance() {
-        when(billingAccountRepository.findFirstByOrderByCreatedAt())
+        when(billingAccountRepository.findByUserId(any(Long.class)))
                 .thenReturn(Mono.just(BillingAccount.builder()
                         .id(1L)
+                        .userId(1L)
                         .money(1000)
                         .createdAt(LocalDate.now())
                         .modifiedAt(LocalDate.now())
                         .build()));
 
-        StepVerifier.create(paymentService.getBalance())
+        StepVerifier.create(paymentService.getBalance(1L))
                 .expectNextMatches(b -> b.getMoney() != null
                         && b.getMoney() == 1000)
                 .verifyComplete();
@@ -51,9 +52,10 @@ public class PaymentServiceImplTest {
         var request = new ProcessPaymentRequest();
         request.setOrderSum(900);
 
-        when(billingAccountRepository.findFirstByOrderByCreatedAt())
+        when(billingAccountRepository.findByUserId(any(Long.class)))
                 .thenReturn(Mono.just(BillingAccount.builder()
                         .id(1L)
+                        .userId(1L)
                         .money(1000)
                         .createdAt(LocalDate.now())
                         .modifiedAt(LocalDate.now())
@@ -62,17 +64,18 @@ public class PaymentServiceImplTest {
         when(billingAccountRepository.save(any(BillingAccount.class)))
                 .thenReturn(Mono.just(BillingAccount.builder()
                         .id(1L)
+                        .userId(1L)
                         .money(100)
                         .createdAt(LocalDate.now())
                         .modifiedAt(LocalDate.now())
                         .build()));
 
-        StepVerifier.create(paymentService.processPayment(request))
+        StepVerifier.create(paymentService.processPayment(1L, request))
                 .expectNextMatches(b -> b.getMoney() != null
                         && b.getMoney() == 100)
                 .verifyComplete();
 
-        verify(billingAccountRepository, times(1)).findFirstByOrderByCreatedAt();
+        verify(billingAccountRepository, times(1)).findByUserId(any(Long.class));
         verify(billingAccountRepository, times(1)).save(any(BillingAccount.class));
     }
 
@@ -81,9 +84,10 @@ public class PaymentServiceImplTest {
         var request = new ProcessPaymentRequest();
         request.setOrderSum(900);
 
-        when(billingAccountRepository.findFirstByOrderByCreatedAt())
+        when(billingAccountRepository.findByUserId(any(Long.class)))
                 .thenReturn(Mono.just(BillingAccount.builder()
                         .id(1L)
+                        .userId(1L)
                         .money(1000)
                         .createdAt(LocalDate.now())
                         .modifiedAt(LocalDate.now())
@@ -97,12 +101,12 @@ public class PaymentServiceImplTest {
                         .modifiedAt(LocalDate.now())
                         .build()));
 
-        StepVerifier.create(paymentService.processPayment(request))
+        StepVerifier.create(paymentService.processPayment(1L, request))
                 .expectNextMatches(b -> b.getMoney() != null
                         && b.getMoney() == 500)
                 .verifyComplete();
 
-        verify(billingAccountRepository, times(1)).findFirstByOrderByCreatedAt();
+        verify(billingAccountRepository, times(1)).findByUserId(any(Long.class));
         verify(billingAccountRepository, times(1)).save(any(BillingAccount.class));
     }
 }

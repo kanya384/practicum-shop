@@ -5,6 +5,5 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <include file="0001-init-billing-account-schema.xml" relativeToChangelogFile="true"/>
-    <include file="0002-create-root-billing-account.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

@@ -9,5 +9,5 @@ public interface OrderService {
 
     Mono<OrderResponseDTO> findById(Long id);
 
-    Flux<OrderResponseDTO> findAll();
+    Flux<OrderResponseDTO> findOrdersOfUser();
 }

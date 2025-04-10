@@ -14,18 +14,24 @@ public class PaymentsServiceImpl implements PaymentsService {
     private final PaymentsApi paymentsApi;
 
     @Override
-    public Mono<Integer> getBalance() {
-        return paymentsApi.paymentsBalanceGet()
+    public Mono<Integer> put5kToBalance(Long userId) {
+        return paymentsApi.paymentsCreateUserIdPost(userId)
+                .map(BalanceResponse::getMoney);
+    }
+
+    @Override
+    public Mono<Integer> getBalance(Long userId) {
+        return paymentsApi.paymentsBalanceUserIdGet(userId)
                 .onErrorResume(t -> Mono.empty())
                 .onErrorComplete()
                 .map(BalanceResponse::getMoney);
     }
 
     @Override
-    public Mono<Integer> processPayment(int orderSum) {
+    public Mono<Integer> processPayment(Long userId, int orderSum) {
         var request = new ProcessPaymentRequest();
         request.setOrderSum(orderSum);
-        return paymentsApi.paymentsProcessPost(request)
+        return paymentsApi.paymentsProcessUserIdPost(userId, request)
                 .map(BalanceResponse::getMoney);
     }
 }

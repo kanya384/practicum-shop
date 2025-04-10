@@ -20,15 +20,25 @@ public class PaymentsServiceImpl implements PaymentService {
     private final BillingAccountRepository billingAccountRepository;
 
     @Override
-    public Mono<BalanceResponse> getBalance() {
-        return billingAccountRepository.findFirstByOrderByCreatedAt()
+    public Mono<BalanceResponse> createAccountAndPutMoneyToBalance(long userId) {
+        return billingAccountRepository.findByUserId(userId)
+                .switchIfEmpty(billingAccountRepository.save(new BillingAccount(userId)))
+                .doOnNext(billingAccount -> billingAccount.setMoney(billingAccount.getMoney() + 5000))
+                .flatMap(billingAccountRepository::save)
+                .map(this::map);
+    }
+
+    @Override
+    public Mono<BalanceResponse> getBalance(long userId) {
+        return billingAccountRepository.findByUserId(userId)
+                .switchIfEmpty(billingAccountRepository.save(new BillingAccount(userId)))
                 .map(this::map);
     }
 
 
     @Override
-    public Mono<BalanceResponse> processPayment(ProcessPaymentRequest request) {
-        return billingAccountRepository.findFirstByOrderByCreatedAt()
+    public Mono<BalanceResponse> processPayment(long userId, ProcessPaymentRequest request) {
+        return billingAccountRepository.findByUserId(userId)
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("Не найден платежный аккаунт")))
                 .doOnNext(ba -> ba.setMoney(ba.getMoney() - request.getOrderSum()))
                 .flatMap(ba -> {
@@ -41,8 +51,8 @@ public class PaymentsServiceImpl implements PaymentService {
     }
 
     @Override
-    public Mono<BalanceResponse> depositMoney(DepositMoneyRequest request) {
-        return billingAccountRepository.findFirstByOrderByCreatedAt()
+    public Mono<BalanceResponse> depositMoney(long userId, DepositMoneyRequest request) {
+        return billingAccountRepository.findByUserId(userId)
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("Не найден платежный аккаунт")))
                 .doOnNext(ba -> ba.setMoney(ba.getMoney() + request.getMoney()))
                 .flatMap(billingAccountRepository::save)

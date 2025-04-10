@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({ResourceNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Mono<ErrorResponse> handleResourceNotFoundException(Exception e) {
+    public Mono<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException e) {
         return Mono.just(ErrorResponse.builder()
                 .message(e.getMessage())
                 .build());

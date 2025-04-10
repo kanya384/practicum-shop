@@ -28,11 +28,11 @@ public class PaymentControllerTest {
         var balanceResponse = new BalanceResponse();
         balanceResponse.setMoney(100);
 
-        when(paymentService.getBalance())
+        when(paymentService.getBalance(any(Long.class)))
                 .thenReturn(Mono.just(balanceResponse));
 
         webTestClient.get()
-                .uri("/payments/balance")
+                .uri("/payments/balance/{id}", 1L)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -48,11 +48,11 @@ public class PaymentControllerTest {
         var request = new ProcessPaymentRequest();
         request.setOrderSum(1500);
 
-        when(paymentService.processPayment(request))
+        when(paymentService.processPayment(any(Long.class), any()))
                 .thenReturn(Mono.just(balanceResponse));
 
         webTestClient.post()
-                .uri("/payments/process")
+                .uri("/payments/process/{id}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
@@ -62,7 +62,7 @@ public class PaymentControllerTest {
                 .jsonPath("$.money").isEqualTo(500);
 
         verify(paymentService, times(1))
-                .processPayment(any(ProcessPaymentRequest.class));
+                .processPayment(any(Long.class), any(ProcessPaymentRequest.class));
     }
 
     @Test
@@ -73,11 +73,11 @@ public class PaymentControllerTest {
         var request = new DepositMoneyRequest();
         request.setMoney(1500);
 
-        when(paymentService.depositMoney(request))
+        when(paymentService.depositMoney(any(Long.class), any()))
                 .thenReturn(Mono.just(balanceResponse));
 
         webTestClient.post()
-                .uri("/payments/deposit")
+                .uri("/payments/deposit/{id}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
@@ -87,6 +87,6 @@ public class PaymentControllerTest {
                 .jsonPath("$.money").isEqualTo(2000);
 
         verify(paymentService, times(1))
-                .depositMoney(any(DepositMoneyRequest.class));
+                .depositMoney(any(Long.class), any(DepositMoneyRequest.class));
     }
 }

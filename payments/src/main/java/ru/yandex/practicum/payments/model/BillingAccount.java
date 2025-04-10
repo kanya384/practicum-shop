@@ -17,9 +17,15 @@ import java.time.LocalDate;
 public class BillingAccount {
     @Id
     private Long id;
+    private Long userId;
     private Integer money;
     @CreatedDate
     private LocalDate createdAt;
     @LastModifiedDate
     private LocalDate modifiedAt;
+
+    public BillingAccount(Long userId) {
+        this.userId = userId;
+        this.money = 0;
+    }
 }

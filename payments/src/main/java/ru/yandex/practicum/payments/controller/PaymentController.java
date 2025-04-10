@@ -16,19 +16,24 @@ public class PaymentController implements PaymentsApi {
     private final PaymentService paymentService;
 
     @Override
-    public Mono<BalanceResponse> paymentsBalanceGet(ServerWebExchange exchange) {
-        return paymentService.getBalance();
+    public Mono<BalanceResponse> paymentsCreateUserIdPost(Long userId, ServerWebExchange exchange) {
+        return paymentService.createAccountAndPutMoneyToBalance(userId);
     }
 
     @Override
-    public Mono<BalanceResponse> paymentsDepositPost(Mono<DepositMoneyRequest> depositMoneyRequest, ServerWebExchange exchange) {
+    public Mono<BalanceResponse> paymentsBalanceUserIdGet(Long userId, ServerWebExchange exchange) {
+        return paymentService.getBalance(userId);
+    }
+
+    @Override
+    public Mono<BalanceResponse> paymentsDepositUserIdPost(Long userId, Mono<DepositMoneyRequest> depositMoneyRequest, ServerWebExchange exchange) {
         return depositMoneyRequest
-                .flatMap(paymentService::depositMoney);
+                .flatMap(request -> paymentService.depositMoney(userId, request));
     }
 
     @Override
-    public Mono<BalanceResponse> paymentsProcessPost(Mono<ProcessPaymentRequest> processPaymentRequest, ServerWebExchange exchange) {
+    public Mono<BalanceResponse> paymentsProcessUserIdPost(Long userId, Mono<ProcessPaymentRequest> processPaymentRequest, ServerWebExchange exchange) {
         return processPaymentRequest
-                .flatMap(paymentService::processPayment);
+                .flatMap(request -> paymentService.processPayment(userId, request));
     }
 }
