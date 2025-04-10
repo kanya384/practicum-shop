@@ -19,6 +19,20 @@ services:
       POSTGRES_USER: sa
       POSTGRES_PASSWORD: password
       POSTGRES_DB: payments
+    ports:
+      - 5433:5432
+    networks:
+      - app-net
+  keycloak:
+    platform: linux/amd64
+    image: quay.io/keycloak/keycloak:26.1.3
+    container_name: 'keycloak'
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
     networks:
       - app-net
   redis:
@@ -39,12 +53,14 @@ services:
       dockerfile: Dockerfile-storefront
       context: .
     ports:
-      - 8080:8080
+      - 80:8081
     depends_on:
       - pg_shop
       - redis
+      - keycloak
     environment:
       SPRING_PROFILES_ACTIVE: prod
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_CLIENT_SECRET: 27iFvEDsWUFc8EJuxhvRk94atn1y3tRg
     networks:
       - app-net
   payments:
@@ -56,17 +72,8 @@ services:
       - 8090:8090
     depends_on:
       - pg_payments
+      - keycloak
     environment:
       SPRING_PROFILES_ACTIVE: prod
     networks:
       - app-net
-  keycloak:
-    platform: linux/amd64
-    image: quay.io/keycloak/keycloak:26.1.3
-    container_name: keycloak
-    command: start-dev
-    environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-    ports:
-      - 8080:8080

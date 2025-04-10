@@ -10,27 +10,27 @@
 docker compose up -d
 ```
 
-Приложение будет доступно по адресу:
+После того как поднимутся все контейнеры, нужно зайти в keycloak по адресу
 
 ```
-http://localhost:8080/products
+http://localhost:8080/
 ```
 
-Для запуска юнит тестов использовать команду:
+создать клиента shop и прописать секрет для контейнера storefront в docker compose файле, после чего перезапустить
+этот контейнер и приложение будет доступно по адресу:
+
+```
+http://localhost
+```
+
+Регистрация пользователя:
+
+```
+http://localhost/register
+```
+
+Для запуска тестов использовать команду:
 
 ```sh
-./gradlew :payments:unit
-./gradlew :storefront:unit
-```
-
-Для запуска интеграционных тестов для витрины нужно запустить сервис платежей:
-
-```sh
-docker pull postgres:17.4 && docker run -d --name pg_pmnts -p 5433:5432 -e POSTGRES_USER=sa -e POSTGRES_PASSWORD=password -e POSTGRES_DB=payments postgres:17.4 && ./gradlew :payments:bootRun
-```
-
-И затем сами тесты:
-
-```sh
-./gradlew :storefront:integration
+./gradlew test
 ```
